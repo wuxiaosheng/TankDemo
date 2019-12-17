@@ -1,0 +1,9 @@
+*.meta
+*.txt
+*.dwlt
+Library/metadata/
+Library/PackageCache/
+*.pdb
+Library/ShaderCache/
+*.cache
+*.log
