@@ -57,6 +57,6 @@ public class GUIManager
     }
 
     private void onServerConnected(IEvent evt) {
-        showView(ViewType.WAIT_JOIN);
+        this.showView(ViewType.WAIT_JOIN);
     }
 }

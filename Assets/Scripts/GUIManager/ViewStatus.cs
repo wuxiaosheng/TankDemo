@@ -33,16 +33,16 @@ public class ViewStatus
     }
 
     private void onLoginExit() {
-        ViewBase login = GUIManager.getInstance().getView("UILogin");
-        if (login != null) {
-            login.destroy();
+        ViewBase view = GUIManager.getInstance().getView("UILogin");
+        if (view != null) {
+            view.setVisible(false);
         }
     }
 
     private void onWaitJoinExit() {
         ViewBase waitting = GUIManager.getInstance().getView("UIWaitting");
         if (waitting != null) {
-            waitting.destroy();
+            waitting.setVisible(false);
         }
     }
 
@@ -65,8 +65,8 @@ public class ViewStatus
         ViewBase view = GUIManager.getInstance().getView("UIWaitting");
         GameObject root = GUIManager.getInstance().getRoot();
         if (view == null) {
-            UILogin login = new UILogin("UIWaitting", "Prefabs/View/UIPreWaitting", root.transform);
-            GUIManager.getInstance().addView("UIWaitting", login);
+            UIWaitting waitting = new UIWaitting("UIWaitting", "Prefabs/View/UIPreWaitting", root.transform);
+            GUIManager.getInstance().addView("UIWaitting", waitting);
         } else {
             view.setPosition(new Vector3(0, 0, 0));
             view.setVisible(true);

@@ -65,7 +65,6 @@
      <Compile Include="Assets\Scripts\GUIManager\ViewBase.cs" />
      <Compile Include="Assets\Scripts\GUIManager\ViewStatus.cs" />
      <Compile Include="Assets\Scripts\GUIManager\ViewType.cs" />
-     <Compile Include="Assets\Scripts\NetManager\JSONParse.cs" />
      <Compile Include="Assets\Scripts\NetManager\MsgStruct.cs" />
      <Compile Include="Assets\Scripts\NetManager\NetManager.cs" />
      <Compile Include="Assets\Scripts\View\UILogin.cs" />

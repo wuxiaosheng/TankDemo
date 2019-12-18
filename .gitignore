@@ -7,3 +7,4 @@ Library/PackageCache/
 Library/ShaderCache/
 *.cache
 *.log
+Temp/

@@ -8,3 +8,14 @@ public class MsgPack {
 }
 
 
+public class CSMsgReady {
+    
+}
+
+public class SCMsgReady {
+    public int code;
+}
+
+public class SCMsgWaitList {
+    public List<KeyValuePair<string, string>> result;
+}

@@ -19,6 +19,10 @@ public class NetManager
         return _instance;
     }
 
+    public NetManager() {
+        _handlers = new Dictionary<string, recvHandler>();
+    }
+
     public void start(string ip, int port) {
         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -63,6 +67,14 @@ public class NetManager
         stream.Write(buffer, 0, buffer.Length);*/
     }
 
+    public void send(string msgType, string msgVal) {
+        MsgPack pack = new MsgPack();
+        pack.msgType = msgType;
+        pack.msgVal = msgVal;
+        string content = JsonUtility.ToJson(pack);
+        send(content);
+    }
+
     public void recv() {
         SocketAsyncEventArgs receiveArgs = new SocketAsyncEventArgs();
         byte[] buffer = new byte[1024*512];
@@ -79,7 +91,7 @@ public class NetManager
     private void onConnected(object sender,SocketAsyncEventArgs args) {
         if (args.SocketError == SocketError.Success) {
             //连接成功
-            EventManager.getInstance().broadcast(EventType.EVT_ON_CONNECTED);
+            EventManager.getInstance().trigger(EventType.EVT_ON_CONNECTED);
             recv();
         } else {
             //连接失败
@@ -88,6 +100,7 @@ public class NetManager
 
     private void onRecv(object sender,SocketAsyncEventArgs args) {
         if (args.SocketError == SocketError.Success && args.BytesTransferred > 0) {
+            Debug.Log("onRecv");
             byte[] bytes = new byte[args.BytesTransferred];
              System.Buffer.BlockCopy(args.Buffer, 0, bytes, 0, bytes.Length);
              string content = Encoding.UTF8.GetString(bytes,0, bytes.Length);
@@ -95,6 +108,7 @@ public class NetManager
              if (_handlers.ContainsKey(pack.msgType)) {
                  _handlers[pack.msgType](pack.msgType, pack.msgVal);
              }
+             recv();
              //JsonUtility.ToJson()
              //解析出来MsgType 然后找出handler响应
         }

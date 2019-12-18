@@ -24,8 +24,6 @@ public class ViewBase
         _view.GetComponent<RectTransform>().anchoredPosition = pos;
     }
     public void setVisible(bool isVisible) {
-        Debug.Log("name:"+_name+" setVisible:"+isVisible);
-        Debug.Log("name:"+_name+" isVisible:"+_view.gameObject.activeSelf);
         bool isActive = _view.gameObject.activeSelf;
         _view.gameObject.SetActive(isVisible);
         if (isActive == true && isVisible == false) {
@@ -34,30 +32,27 @@ public class ViewBase
             onEnabled();
         }
     }
+    public bool isVisible() {
+        return _view.gameObject.activeSelf;
+    }
     public void destroy() {
-        Debug.Log("destroy name:"+_name);
         GameObject.Destroy(_view);
         onDestroy();
     }
     public virtual void update() {
-
     }
     protected virtual void onCreate() {
-        Debug.Log("ViewBase onCreate");
     }
 
     protected virtual void onEnabled() {
-        Debug.Log("ViewBase onEnabled");
         onAddListener();
     }
 
     protected virtual void onDisabled() {
-        Debug.Log("ViewBase onDisabled");
         onRemoveListener();
     }
 
     protected virtual void onDestroy() {
-        Debug.Log("ViewBase onDestroy");
     }
 
     protected virtual void onAddListener() {
@@ -69,6 +64,10 @@ public class ViewBase
     }
 
     protected GameObject getChildByName(string name) {
-        return _view.Find(name).gameObject;
+        Transform trans = _view.Find(name);
+        if (trans) {
+            return trans.gameObject;
+        }
+        return null;
     }
 }

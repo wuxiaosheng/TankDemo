@@ -12,7 +12,6 @@ public enum EScene {
 public class GameCtrl : MonoBehaviour
 {
     // Start is called before the first frame update
-    
     void Start()
     {
         //EventManager.getInstance().addEventListener(EventType.TEST_EVT_1, new Handler(onTestEvt1));
@@ -26,31 +25,11 @@ public class GameCtrl : MonoBehaviour
 
     void onAddListener() {
         EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
+        NetManager.getInstance().addRecvhandler("SCMsgReady", SCMsgReady);
     }
 
-    void onClick() {
-        //Event evt = EventManager.getInstance().createEvent(EventType.TEST_EVT_1, "test data", "12315");
-        //EventManager.getInstance().trigger(evt);
-        /*GameObject uipanel = GameObject.Find("Canvas");
-        Debug.Log(uipanel.GetComponent<RectTransform>().sizeDelta.x);
-        //GameObject root = new GameObject();
-        //root.transform.parent = uipanel.transform;
-        //root.transform.localPosition = new Vector2(0, 0);
-        GameObject obj = Instantiate((GameObject)Resources.Load("Panel"));
-        obj.transform.parent = uipanel.transform;
-        obj.transform.localPosition = new Vector2(0, 0);
-        GameObject obj = Instantiate((GameObject)Resources.Load("Panel"));
-        GameObject UIParent = GameObject.Find("Canvas");
-        float width = UIParent.GetComponent<RectTransform>().sizeDelta.x;
-        float height = UIParent.GetComponent<RectTransform>().sizeDelta.y;
-        GameObject obj = new GameObject();
-        obj.AddComponent<CanvasRenderer>();
-        obj.AddComponent<Image>();
-        obj.GetComponent<RectTransform>().SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, width);
-        obj.GetComponent<RectTransform>().SetInsetAndSizeFromParentEdge(RectTransform.Edge.Bottom, 0, height);
-        obj.GetComponent<RectTransform>().anchorMin = new Vector2(0, 0);
-        obj.GetComponent<RectTransform>().anchorMax = new Vector2(1, 1);
-        obj.transform.parent = UIParent.transform;*/
+    private void onRemoveListener() {
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
     }
 
     // Update is called once per frame
@@ -60,7 +39,18 @@ public class GameCtrl : MonoBehaviour
         GUIManager.getInstance().update();
     }
 
-    void onServerConnected(IEvent evt) {
-        
+    private void onServerConnected(IEvent evt) {
+        //发送开始消息
+        CSMsgReady ready = new CSMsgReady();
+        string val = JsonUtility.ToJson(ready);
+        NetManager.getInstance().send("CSMsgReady", val);
+    }
+
+    private void SCMsgReady(string msgType, string val) {
+        SCMsgReady pack = JsonUtility.FromJson<SCMsgReady>(val);
+        if (pack.code == 1) {
+            //开始游戏
+            Debug.Log("player ready");
+        }
     }
 }
