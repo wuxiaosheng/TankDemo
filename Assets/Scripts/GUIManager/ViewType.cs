@@ -5,4 +5,5 @@ public enum ViewType {
     NONE,
     LOGIN,
     WAIT_JOIN,
+    GAME,
 }

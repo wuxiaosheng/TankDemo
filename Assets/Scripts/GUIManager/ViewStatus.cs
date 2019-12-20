@@ -18,6 +18,11 @@ public class ViewStatus
                 onStatusExit(_status);
                 onWaitJoin();
             }
+        } else if (_status == ViewType.WAIT_JOIN) {
+            if (status == ViewType.GAME) {
+                onStatusExit(_status);
+                onGame();
+            }
         }
     }
     public ViewType getStatus() {
@@ -29,6 +34,8 @@ public class ViewStatus
             onLoginExit();
         } else if (status == ViewType.WAIT_JOIN) {
             onWaitJoinExit();
+        } else if (status == ViewType.GAME) {
+            onGameExit();
         }
     }
 
@@ -43,6 +50,13 @@ public class ViewStatus
         ViewBase waitting = GUIManager.getInstance().getView("UIWaitting");
         if (waitting != null) {
             waitting.setVisible(false);
+        }
+    }
+
+    private void onGameExit() {
+        ViewBase game = GUIManager.getInstance().getView("UIGame");
+        if (game != null) {
+            game.setVisible(false);
         }
     }
 
@@ -67,6 +81,19 @@ public class ViewStatus
         if (view == null) {
             UIWaitting waitting = new UIWaitting("UIWaitting", "Prefabs/View/UIPreWaitting", root.transform);
             GUIManager.getInstance().addView("UIWaitting", waitting);
+        } else {
+            view.setPosition(new Vector3(0, 0, 0));
+            view.setVisible(true);
+        }
+    }
+
+    private void onGame() {
+        _status = ViewType.GAME;
+        ViewBase view = GUIManager.getInstance().getView("UIGame");
+        GameObject root = GUIManager.getInstance().getRoot();
+        if (view == null) {
+            UIGame game = new UIGame("UIGame", "Prefabs/View/UIPreGame", root.transform);
+            GUIManager.getInstance().addView("UIGame", game);
         } else {
             view.setPosition(new Vector3(0, 0, 0));
             view.setVisible(true);

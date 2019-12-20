@@ -2,20 +2,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class MsgPack {
     public string msgType;
     public string msgVal;
 }
 
-
+[System.Serializable]
 public class CSMsgReady {
     
 }
 
+[System.Serializable]
 public class SCMsgReady {
     public int code;
 }
 
+[System.Serializable]
+public class SCMsgHead {
+    public int frame;
+}
+
+[System.Serializable]
+public class PlayerInfo {
+    public int playerId;
+    public string name;
+}
+
+[System.Serializable]
 public class SCMsgWaitList {
-    public List<KeyValuePair<string, string>> result;
+    public PlayerInfo[] result;
 }

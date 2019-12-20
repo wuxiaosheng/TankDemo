@@ -25,11 +25,16 @@ public class GameCtrl : MonoBehaviour
 
     void onAddListener() {
         EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onGameStart);
         NetManager.getInstance().addRecvhandler("SCMsgReady", SCMsgReady);
+        NetManager.getInstance().addRecvhandler("SCMsgHead", SCMsgHead);
     }
 
     private void onRemoveListener() {
         EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onGameStart);
+        NetManager.getInstance().removeRecvHandler("SCMsgReady", SCMsgReady);
+        NetManager.getInstance().removeRecvHandler("SCMsgHead", SCMsgHead);
     }
 
     // Update is called once per frame
@@ -37,6 +42,7 @@ public class GameCtrl : MonoBehaviour
     {
         EventManager.getInstance().update();
         GUIManager.getInstance().update();
+        ObjectManager.getInstance().update();
     }
 
     private void onServerConnected(IEvent evt) {
@@ -46,11 +52,20 @@ public class GameCtrl : MonoBehaviour
         NetManager.getInstance().send("CSMsgReady", val);
     }
 
+    private void onGameStart(IEvent evt) {
+        ObjectManager.getInstance().createTank();
+    }
+
     private void SCMsgReady(string msgType, string val) {
         SCMsgReady pack = JsonUtility.FromJson<SCMsgReady>(val);
         if (pack.code == 1) {
             //开始游戏
             Debug.Log("player ready");
         }
+    }
+
+    private void SCMsgHead(string msgType, string val) {
+        SCMsgHead pack = JsonUtility.FromJson<SCMsgHead>(val);
+        Debug.Log("SCMsgHead frame:"+pack.frame);
     }
 }

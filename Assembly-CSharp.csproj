@@ -53,6 +53,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Resources\TutorialInfo\Scripts\Readme.cs" />
      <Compile Include="Assets\Scripts\EventManager\Event.cs" />
      <Compile Include="Assets\Scripts\EventManager\EventHandler.cs" />
      <Compile Include="Assets\Scripts\EventManager\EventManager.cs" />
@@ -67,6 +68,10 @@
      <Compile Include="Assets\Scripts\GUIManager\ViewType.cs" />
      <Compile Include="Assets\Scripts\NetManager\MsgStruct.cs" />
      <Compile Include="Assets\Scripts\NetManager\NetManager.cs" />
+     <Compile Include="Assets\Scripts\ObjectManager\BulletObject.cs" />
+     <Compile Include="Assets\Scripts\ObjectManager\ObjectManager.cs" />
+     <Compile Include="Assets\Scripts\ObjectManager\TankObject.cs" />
+     <Compile Include="Assets\Scripts\View\UIGame.cs" />
      <Compile Include="Assets\Scripts\View\UILogin.cs" />
      <Compile Include="Assets\Scripts\View\UIWaitting.cs" />
  <Reference Include="Unity.TextMeshPro.Editor">

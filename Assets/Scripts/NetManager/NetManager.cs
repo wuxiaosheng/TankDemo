@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 
 public class NetManager
 {
@@ -21,6 +22,7 @@ public class NetManager
 
     public NetManager() {
         _handlers = new Dictionary<string, recvHandler>();
+        onAddListener();
     }
 
     public void start(string ip, int port) {
@@ -30,6 +32,10 @@ public class NetManager
         args.RemoteEndPoint = _point;
         args.Completed += onConnected;
         _socket.ConnectAsync(args);
+    }
+
+    private void onAddListener() {
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_DISPATCH_MSG, onDispatchMsg);
     }
 
     public void addRecvhandler(string key, recvHandler handler) {
@@ -54,6 +60,7 @@ public class NetManager
 
     public void send(string content) {
         if (_socket == null || !_socket.Connected) { return; }
+        content += ";";
         byte[] buffer = new byte[1024];
         buffer = Encoding.UTF8.GetBytes(content);
         SocketAsyncEventArgs sendArgs = new SocketAsyncEventArgs();
@@ -100,17 +107,29 @@ public class NetManager
 
     private void onRecv(object sender,SocketAsyncEventArgs args) {
         if (args.SocketError == SocketError.Success && args.BytesTransferred > 0) {
-            Debug.Log("onRecv");
             byte[] bytes = new byte[args.BytesTransferred];
              System.Buffer.BlockCopy(args.Buffer, 0, bytes, 0, bytes.Length);
              string content = Encoding.UTF8.GetString(bytes,0, bytes.Length);
-             MsgPack pack = JsonUtility.FromJson<MsgPack>(content);
-             if (_handlers.ContainsKey(pack.msgType)) {
-                 _handlers[pack.msgType](pack.msgType, pack.msgVal);
+             string[] sArray=Regex.Split(content, ";", RegexOptions.IgnoreCase);
+             foreach (string pair in sArray) {
+                 Debug.Log(pair);
+                 if (pair.Length == 0) { continue; }
+                 MsgPack pack = JsonUtility.FromJson<MsgPack>(pair);
+                 EventManager.getInstance().trigger(EventType.EVT_ON_DISPATCH_MSG, "MsgPack", pack);
              }
              recv();
              //JsonUtility.ToJson()
              //解析出来MsgType 然后找出handler响应
+        } else {
+            Debug.Log("recv failure");
+        }
+        
+    }
+
+    private void onDispatchMsg(IEvent evt) {
+        MsgPack pack = (MsgPack)evt.getArg("MsgPack");
+        if (_handlers.ContainsKey(pack.msgType)) {
+            _handlers[pack.msgType](pack.msgType, pack.msgVal);
         }
     }
 }

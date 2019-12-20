@@ -10,6 +10,7 @@ public class UIWaitting : ViewBase
     public UIWaitting(string name, string path, Transform parent) : base(name, path, parent) {
         _cellDemo = getChildByName("CellDemo");
         _cellDemo.SetActive(false);
+        getChildByName("BtnStart").GetComponent<Button>().onClick.AddListener(onClickStart);
         onAddListener();
     }
 
@@ -38,26 +39,32 @@ public class UIWaitting : ViewBase
         
     }
 
-    private void createCell(string name) {
+    private void createCell(PlayerInfo info) {
         GameObject content = getScrollViewContent();
-        int count = content.transform.childCount;
         GameObject cellClone = GameObject.Instantiate(_cellDemo, content.transform);
-        cellClone.name = count.ToString();
+        cellClone.name = info.playerId.ToString();
         cellClone.SetActive(true);
         GameObject textname = cellClone.transform.Find("text_name").gameObject;
-        textname.GetComponent<Text>().text = name;
+        textname.GetComponent<Text>().text = info.name;
     }
 
     private void onPlayerJoin(IEvent evt) {
         string name = (string)evt.getArg("name");
-        createCell(name);
+        //createCell(name);
     }
 
     private void SCMsgWaitList(string msgType, string msgVal) {
         Debug.Log("SCMsgWaitList");
-        List<KeyValuePair<string, string>> res = JsonUtility.FromJson<List<KeyValuePair<string, string>>>(msgVal);
-        foreach (KeyValuePair<string, string> pair in res) {
-            Debug.Log(pair.Key);
+        SCMsgWaitList res = JsonUtility.FromJson<SCMsgWaitList>(msgVal);
+        GameObject content = getScrollViewContent();
+        foreach (PlayerInfo pair in res.result) {
+            if (content.transform.Find(pair.playerId.ToString()) == null) {
+                createCell(pair);
+            }
         }
+    }
+    private void onClickStart() {
+        GUIManager.getInstance().showView(ViewType.GAME);
+        EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_START);
     }
 }

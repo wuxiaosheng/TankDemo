@@ -11,16 +11,9 @@ class MsgDeal:
 		if (getattr(self, data["msgType"])):
 			getattr(self, data["msgType"])(data["msgVal"], player)
 	def CSMsgReady(self, data, player):
-		result = {}
-		result["msgType"] = "SCMsgReady"
-		result["msgVal"] = json.dumps({"code":1})
-		self.server.sendMsg(player.getSocket(), json.dumps(result))
-		
+		self.server.sendGameMSG(player.getSocket(), "SCMsgReady", json.dumps({"code":1}))
 		allPlayerInfo = self.server.getAllPlayerInfo()
-		result = {}
-		result["msgType"] = "SCMsgWaitList"
-		result["msgVal"] = json.dumps(allPlayerInfo)
-		self.server.notifyAll(json.dumps(result))
+		self.server.notifyAll("SCMsgWaitList", json.dumps({"result":allPlayerInfo}))
 		
 
 class GamePlayer:
@@ -47,7 +40,7 @@ class TankServer:
 		self.sockArr.append(self.listenSocket)
 	def start(self):
 		while True:
-			r, w, e = select.select(self.sockArr, [], [], 5)
+			r, w, e = select.select(self.sockArr, [], [], 10)
 			self.loopAllSocket(r)
 	def loopAllSocket(self, reableSockets):
 		for sock in reableSockets:
@@ -55,6 +48,7 @@ class TankServer:
 				self.onEvtNewClientEnter(sock)
 			else:
 				self.onEvtRecvMsg(sock)
+		
 	def onEvtNewClientEnter(self, sock):
 		conn, addr = sock.accept()
 		self.sockArr.append(conn)
@@ -68,15 +62,30 @@ class TankServer:
 			self.closeSocket(sock)
 			self.removePlayer(player.getPlayerId())
 			return
-		data = json.loads(data.decode("utf8"))
-		self.msgDeal.onDeal(data, player)
+		datas = data.split(";")
+		for res in datas:
+			if (res == ""):
+				continue
+			res = json.loads(res.decode("utf8"))
+			self.msgDeal.onDeal(res, player)
+	def sendGameMSG(self, sock, msgType, msgVal):
+		result = {}
+		result["msgType"] = msgType
+		result["msgVal"] = msgVal
+		self.sendMsg(sock, json.dumps(result))
 	def sendMsg(self, sock, msg):
+		msg = msg+";"
 		print("send msg:"+msg)
 		sock.sendall(bytes(msg))
 	def notify(self, playerId, msg):
 		if (self.players[playerId]):
 			self.sendMsg(self.players[playerId].getSocket(), msg)
-	def notifyAll(self, msg):
+	def notifyAll(self, msgType, msgVal):
+		result = {}
+		result["msgType"] = msgType
+		result["msgVal"] = msgVal
+		msg = json.dumps(result)
+		print("msg:"+msg)
 		for key in self.players:
 			self.notify(key, msg)
 	def closeSocket(self, sock):
@@ -94,6 +103,7 @@ class TankServer:
 		self.players[playerId] = GamePlayer(socket, playerId, name)
 		self.count = self.count+1;
 	def removePlayer(self, playerId):
+		print("remove player id:"+str(playerId))
 		del self.players[playerId]
 	def getAllPlayerInfo(self):
 		data = []
