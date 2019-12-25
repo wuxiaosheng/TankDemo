@@ -54,17 +54,20 @@ public class UIWaitting : ViewBase
     }
 
     private void SCMsgWaitList(string msgType, string msgVal) {
-        Debug.Log("SCMsgWaitList");
         SCMsgWaitList res = JsonUtility.FromJson<SCMsgWaitList>(msgVal);
         GameObject content = getScrollViewContent();
         foreach (PlayerInfo pair in res.result) {
-            if (content.transform.Find(pair.playerId.ToString()) == null) {
+            Transform cell = content.transform.Find(pair.playerId.ToString());
+            if (cell == null) {
                 createCell(pair);
+            } else {
+
             }
         }
     }
     private void onClickStart() {
-        GUIManager.getInstance().showView(ViewType.GAME);
-        EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_START);
+        NetManager.getInstance().send("CSMsgGameStart", "");
+        //GUIManager.getInstance().showView(ViewType.GAME);
+        //EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_START);
     }
 }

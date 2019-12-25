@@ -16,11 +16,7 @@ public class CSMsgReady {
 [System.Serializable]
 public class SCMsgReady {
     public int code;
-}
-
-[System.Serializable]
-public class SCMsgHead {
-    public int frame;
+    public int playerId;
 }
 
 [System.Serializable]
@@ -30,6 +26,6 @@ public class PlayerInfo {
 }
 
 [System.Serializable]
-public class SCMsgWaitList {
+public class SCJoinRoom {
     public PlayerInfo[] result;
 }
