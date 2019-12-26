@@ -8,3 +8,5 @@ Library/ShaderCache/
 *.cache
 *.log
 Temp/
+Library/PlayerDataCache/
+publish/

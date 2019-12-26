@@ -6,6 +6,7 @@ public class DataManager
 {
     private static DataManager _instance;
     private int _selfId;
+    private int _frame;
     public static DataManager getInstance() {
         if (_instance == null) {
             _instance = new DataManager();
@@ -19,6 +20,14 @@ public class DataManager
 
     public int getSelfId() {
         return _selfId;
+    }
+
+    public void setFrame(int frame) {
+        _frame = frame;
+    }
+
+    public int getFrame() {
+        return _frame;
     }
 
 }

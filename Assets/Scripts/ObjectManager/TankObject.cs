@@ -25,8 +25,24 @@ public class TankObject : MonoBehaviour
         h *= Time.deltaTime;
         v *= Time.deltaTime;
         float angle = v==0.0f ? Mathf.Atan(h/v) : 0.0f;
-        transform.Translate(0.0f, 0.0f, v);
-        transform.Rotate(0.0f, h*10, 0.0f);
+        if (v != 0) {
+            //transform.Translate(0.0f, 0.0f, v);
+            ObjectManager.getInstance().uploadMove(new Vector3(0.0f, 0.0f, v));
+        }
+        if (h != 0) {
+            //transform.Rotate(0.0f, h*10, 0.0f);
+            ObjectManager.getInstance().uploadRotate(new Vector3(0.0f, h*10, 0.0f));
+        }
+        
+        
+    }
+
+    public void move(Vector3 pos) {
+        transform.Translate(pos);
+    }
+
+    public void rotate(Vector3 ro) {
+        transform.Rotate(ro);
     }
 
 

@@ -95,6 +95,18 @@ public class NetManager
         string content = Encoding.UTF8.GetString(buffer,0, buffer.Length);*/
     }
 
+    public void uploadCmd(int type, string cmdStr) {
+        CSMsgNetFrame msg = new CSMsgNetFrame();
+        PlayerCmd cmd = new PlayerCmd();
+        cmd.cmd = cmdStr;
+        cmd.type = type;
+        cmd.playerId = DataManager.getInstance().getSelfId();
+        msg.frame = DataManager.getInstance().getFrame();
+        msg.cmd = cmd;
+        string val = JsonUtility.ToJson(msg);
+        send("CSMsgNetFrame", val);
+    }
+
     private void onConnected(object sender,SocketAsyncEventArgs args) {
         if (args.SocketError == SocketError.Success) {
             //连接成功
@@ -112,7 +124,6 @@ public class NetManager
              string content = Encoding.UTF8.GetString(bytes,0, bytes.Length);
              string[] sArray=Regex.Split(content, ";", RegexOptions.IgnoreCase);
              foreach (string pair in sArray) {
-                 Debug.Log(pair);
                  if (pair.Length == 0) { continue; }
                  MsgPack pack = JsonUtility.FromJson<MsgPack>(pair);
                  EventManager.getInstance().trigger(EventType.EVT_ON_DISPATCH_MSG, "MsgPack", pack);

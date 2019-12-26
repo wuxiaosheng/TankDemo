@@ -27,12 +27,14 @@ public class GameCtrl : MonoBehaviour
         EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
         EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onGameStart);
         NetManager.getInstance().addRecvhandler("SCMsgReady", SCMsgReady);
+        NetManager.getInstance().addRecvhandler("SCMsgNetFrame", SCMsgNetFrame);
     }
 
     private void onRemoveListener() {
         EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
         EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onGameStart);
         NetManager.getInstance().removeRecvHandler("SCMsgReady", SCMsgReady);
+        NetManager.getInstance().removeRecvHandler("SCMsgNetFrame", SCMsgNetFrame);
     }
 
     // Update is called once per frame
@@ -51,7 +53,7 @@ public class GameCtrl : MonoBehaviour
     }
 
     private void onGameStart(IEvent evt) {
-        //ObjectManager.getInstance().createTank();
+        ObjectManager.getInstance().createTank();
     }
 
     private void SCMsgReady(string msgType, string val) {
@@ -59,8 +61,13 @@ public class GameCtrl : MonoBehaviour
         if (pack.code == 1) {
             //开始游戏
             DataManager.getInstance().setSelfId(pack.playerId);
-            Debug.Log("player ready");
         }
+    }
+
+    private void SCMsgNetFrame(string msgType, string msgVal) {
+        SCMsgNetFrame res = JsonUtility.FromJson<SCMsgNetFrame>(msgVal);
+        DataManager.getInstance().setFrame(res.frame);
+        
     }
 
 }

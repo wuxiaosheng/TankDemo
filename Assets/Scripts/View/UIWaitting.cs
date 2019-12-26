@@ -25,13 +25,17 @@ public class UIWaitting : ViewBase
     override
     protected void onAddListener() {
         EventManager.getInstance().addEventListener(EventType.EVT_ON_PLAYER_JOIN, onPlayerJoin);
-        NetManager.getInstance().addRecvhandler("SCMsgWaitList", SCMsgWaitList);
+        NetManager.getInstance().addRecvhandler("SCMsgJoinRoom", SCMsgJoinRoom);
+        NetManager.getInstance().addRecvhandler("SCMsgExitRoom", SCMsgExitRoom);
+        NetManager.getInstance().addRecvhandler("SCMsgGameStart", SCMsgGameStart);
     }
 
     override
     protected void onRemoveListener() {
         EventManager.getInstance().removeEventListener(EventType.EVT_ON_PLAYER_JOIN, onPlayerJoin);
-        NetManager.getInstance().removeRecvHandler("SCMsgWaitList", SCMsgWaitList);
+        NetManager.getInstance().removeRecvHandler("SCMsgJoinRoom", SCMsgJoinRoom);
+        NetManager.getInstance().removeRecvHandler("SCMsgExitRoom", SCMsgExitRoom);
+        NetManager.getInstance().removeRecvHandler("SCMsgGameStart", SCMsgGameStart);
     }
 
     override
@@ -50,13 +54,12 @@ public class UIWaitting : ViewBase
 
     private void onPlayerJoin(IEvent evt) {
         string name = (string)evt.getArg("name");
-        //createCell(name);
     }
 
-    private void SCMsgWaitList(string msgType, string msgVal) {
-        SCMsgWaitList res = JsonUtility.FromJson<SCMsgWaitList>(msgVal);
+    private void SCMsgJoinRoom(string msgType, string msgVal) {
+        SCMsgJoinRoom res = JsonUtility.FromJson<SCMsgJoinRoom>(msgVal);
         GameObject content = getScrollViewContent();
-        foreach (PlayerInfo pair in res.result) {
+        foreach (PlayerInfo pair in res.players) {
             Transform cell = content.transform.Find(pair.playerId.ToString());
             if (cell == null) {
                 createCell(pair);
@@ -65,8 +68,24 @@ public class UIWaitting : ViewBase
             }
         }
     }
+    private void SCMsgExitRoom(string msgType, string msgVal) {
+        SCMsgExitRoom res = JsonUtility.FromJson<SCMsgExitRoom>(msgVal);
+        GameObject content = getScrollViewContent();
+        foreach (PlayerInfo pair in res.players) {
+        }
+    }
+
+    private void SCMsgGameStart(string msgType, string msgVal) {
+        SCMsgGameStart res = JsonUtility.FromJson<SCMsgGameStart>(msgVal);
+        GUIManager.getInstance().showView(ViewType.GAME);
+        EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_START);
+        DataManager.getInstance().setFrame(res.frame);
+    }
+
     private void onClickStart() {
-        NetManager.getInstance().send("CSMsgGameStart", "");
+        CSMsgGameStart gamestart = new CSMsgGameStart();
+        string val = JsonUtility.ToJson(gamestart);
+        NetManager.getInstance().send("CSMsgGameStart", val);
         //GUIManager.getInstance().showView(ViewType.GAME);
         //EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_START);
     }
