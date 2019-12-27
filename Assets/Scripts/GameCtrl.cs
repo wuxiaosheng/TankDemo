@@ -14,12 +14,8 @@ public class GameCtrl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //EventManager.getInstance().addEventListener(EventType.TEST_EVT_1, new Handler(onTestEvt1));
-        //EventManager.getInstance().addEventListener(EventType.TEST_EVT_1, new Handler(onTestEvt2));
-        //Button btn = GameObject.Find("Button").GetComponent<Button>();
-        //btn.onClick.AddListener(onClick);
         GUIManager.getInstance().showView(ViewType.LOGIN);
-        NetManager.getInstance().start("192.168.1.10", 19904);
+        NetManager.getInstance().start("192.168.1.107", 19904);
         onAddListener();
     }
 
