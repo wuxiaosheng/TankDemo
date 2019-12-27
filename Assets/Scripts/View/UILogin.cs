@@ -14,6 +14,14 @@ public class UILogin : ViewBase
         _text = getChildByName("text");
     }
     override
+    protected void onAddListener() {
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
+    }
+    override
+    protected void onRemoveListener() {
+        //EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
+    }
+    override
     public void update() {
         base.update();
         _delay -= Time.deltaTime;
@@ -22,5 +30,8 @@ public class UILogin : ViewBase
             _delay = 2.0f;
         }
         _text.GetComponent<Text>().text = _content;
+    }
+    private void onServerConnected(IEvent evt) {
+        GUIManager.getInstance().showView(ViewType.WAIT_JOIN);
     }
 }

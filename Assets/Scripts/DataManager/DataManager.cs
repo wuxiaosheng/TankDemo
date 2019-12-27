@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class DataManager
 {
+    
     private static DataManager _instance;
-    private int _selfId;
-    private int _frame;
+    private ReadOnlyData _readOnly;
+    private WirteOnlyData _writeOnly;
+    private Dictionary<string, DataBase> _dict;
     public static DataManager getInstance() {
         if (_instance == null) {
             _instance = new DataManager();
@@ -14,20 +16,30 @@ public class DataManager
         return _instance;
     }
 
-    public void setSelfId(int playerId) {
-        _selfId = playerId;
+    public DataManager() {
+        _dict = new Dictionary<string, DataBase>();
+        _readOnly = new ReadOnlyData();
+        _readOnly.delegateGetDataMethod(getDataByName);
+        _writeOnly = new WirteOnlyData();
+        _writeOnly.delegateGetDataMethod(getDataByName);
+        _dict["GameData"] = new GameData();
+        _dict["ItemData"] = new ItemData();
+        _dict["PlayerData"] = new PlayerData();
     }
 
-    public int getSelfId() {
-        return _selfId;
+    private DataBase getDataByName(string name) {
+        if (_dict.ContainsKey(name)) {
+            return _dict[name];
+        }
+        return null;
     }
 
-    public void setFrame(int frame) {
-        _frame = frame;
+    public ReadOnlyData getReadOnly() {
+        return _readOnly;
     }
 
-    public int getFrame() {
-        return _frame;
+    public WirteOnlyData getWirteOnly() {
+        return _writeOnly;
     }
 
 }

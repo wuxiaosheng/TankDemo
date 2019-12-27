@@ -18,8 +18,6 @@ public class GUIManager
         _dict = new Dictionary<string, ViewBase>();
         _root = GameObject.Find("ViewPanel");
         _status = new ViewStatus();
-        Debug.Log("create gui manager");
-        onAddListener();
     }
 
     public void showView(ViewType type) {
@@ -28,7 +26,6 @@ public class GUIManager
 
     public ViewBase getView(string name) {
         if (_dict.ContainsKey(name)) {
-            Debug.Log("getview name:"+name);
             return _dict[name];
         }
         return null;
@@ -44,19 +41,11 @@ public class GUIManager
         }
     }
 
+    public void updateNet(SCMsgNetFrame data) {
+
+    }
+
     public void addView(string name, ViewBase view) {
         _dict.Add(name, view);
-    }
-
-    private void onAddListener() {
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
-    }
-
-    private void onRemoveListener() {
-        EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
-    }
-
-    private void onServerConnected(IEvent evt) {
-        this.showView(ViewType.WAIT_JOIN);
     }
 }

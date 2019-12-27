@@ -13,6 +13,8 @@ public class NetManager
     private IPEndPoint _point;
     private static NetManager _instance;
     private Dictionary<string, recvHandler> _handlers;
+    private NetRecv _recv;
+    private NetSend _send;
     public static NetManager getInstance() {
         if (_instance == null) {
             _instance = new NetManager();
@@ -22,7 +24,16 @@ public class NetManager
 
     public NetManager() {
         _handlers = new Dictionary<string, recvHandler>();
+        
         onAddListener();
+    }
+
+    public NetSend getNetSend() {
+        return _send;
+    }
+
+    public NetRecv getNetRecv() {
+        return _recv;
     }
 
     public void start(string ip, int port) {
@@ -35,7 +46,9 @@ public class NetManager
     }
 
     private void onAddListener() {
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
         EventManager.getInstance().addEventListener(EventType.EVT_ON_DISPATCH_MSG, onDispatchMsg);
+        
     }
 
     public void addRecvhandler(string key, recvHandler handler) {
@@ -58,7 +71,7 @@ public class NetManager
         }
     }
 
-    public void send(string content) {
+    private void send(string content) {
         if (_socket == null || !_socket.Connected) { return; }
         content += ";";
         byte[] buffer = new byte[1024];
@@ -67,11 +80,6 @@ public class NetManager
         sendArgs.RemoteEndPoint = _point;
         sendArgs.SetBuffer(buffer, 0, buffer.Length);
         _socket.SendAsync(sendArgs);
-        /*if (!_isConnected) { return; }
-        var stream = _client.GetStream();
-        byte[] buffer = new byte[1024];
-        buffer = Encoding.UTF8.GetBytes(content);
-        stream.Write(buffer, 0, buffer.Length);*/
     }
 
     public void send(string msgType, string msgVal) {
@@ -89,10 +97,6 @@ public class NetManager
         receiveArgs.RemoteEndPoint = _point;
         receiveArgs.Completed += onRecv;
         _socket.ReceiveAsync(receiveArgs);
-        /*var stream = _client.GetStream();
-        byte[] buffer = new byte[1024];
-        stream.Read(buffer, 0, buffer.Length);
-        string content = Encoding.UTF8.GetString(buffer,0, buffer.Length);*/
     }
 
     public void uploadCmd(int type, string cmdStr) {
@@ -100,8 +104,8 @@ public class NetManager
         PlayerCmd cmd = new PlayerCmd();
         cmd.cmd = cmdStr;
         cmd.type = type;
-        cmd.playerId = DataManager.getInstance().getSelfId();
-        msg.frame = DataManager.getInstance().getFrame();
+        cmd.playerId = DataManager.getInstance().getReadOnly().getSelfId();
+        msg.frame = DataManager.getInstance().getReadOnly().getFrame();
         msg.cmd = cmd;
         string val = JsonUtility.ToJson(msg);
         send("CSMsgNetFrame", val);
@@ -114,6 +118,7 @@ public class NetManager
             recv();
         } else {
             //连接失败
+            _socket.Close();
         }
     }
 
@@ -142,5 +147,10 @@ public class NetManager
         if (_handlers.ContainsKey(pack.msgType)) {
             _handlers[pack.msgType](pack.msgType, pack.msgVal);
         }
+    }
+
+    private void onServerConnected(IEvent evt) {
+        _recv = new NetRecv();
+        _send = new NetSend();
     }
 }

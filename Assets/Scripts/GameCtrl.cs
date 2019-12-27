@@ -26,15 +26,13 @@ public class GameCtrl : MonoBehaviour
     void onAddListener() {
         EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
         EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onGameStart);
-        NetManager.getInstance().addRecvhandler("SCMsgReady", SCMsgReady);
-        NetManager.getInstance().addRecvhandler("SCMsgNetFrame", SCMsgNetFrame);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_NET_UPDATE, onNetUpdate);
     }
 
-    private void onRemoveListener() {
+    void onRemoveListener() {
         EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
         EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onGameStart);
-        NetManager.getInstance().removeRecvHandler("SCMsgReady", SCMsgReady);
-        NetManager.getInstance().removeRecvHandler("SCMsgNetFrame", SCMsgNetFrame);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_NET_UPDATE, onNetUpdate);
     }
 
     // Update is called once per frame
@@ -47,27 +45,17 @@ public class GameCtrl : MonoBehaviour
 
     private void onServerConnected(IEvent evt) {
         //发送开始消息
-        CSMsgReady ready = new CSMsgReady();
-        string val = JsonUtility.ToJson(ready);
-        NetManager.getInstance().send("CSMsgReady", val);
+        NetManager.getInstance().getNetSend().sendReady();
     }
 
     private void onGameStart(IEvent evt) {
-        ObjectManager.getInstance().createTank();
+
     }
 
-    private void SCMsgReady(string msgType, string val) {
-        SCMsgReady pack = JsonUtility.FromJson<SCMsgReady>(val);
-        if (pack.code == 1) {
-            //开始游戏
-            DataManager.getInstance().setSelfId(pack.playerId);
-        }
-    }
-
-    private void SCMsgNetFrame(string msgType, string msgVal) {
-        SCMsgNetFrame res = JsonUtility.FromJson<SCMsgNetFrame>(msgVal);
-        DataManager.getInstance().setFrame(res.frame);
-        
+    private void onNetUpdate(IEvent evt) {
+        SCMsgNetFrame data = (SCMsgNetFrame)evt.getArg("NetFrameData");
+        GUIManager.getInstance().updateNet(data);
+        ObjectManager.getInstance().updateNet(data);
     }
 
 }

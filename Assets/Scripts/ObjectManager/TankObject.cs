@@ -6,17 +6,14 @@ public class TankObject : MonoBehaviour
 {
     // Start is called before the first frame update
     private Vector3 _pos;
-    private GameObject _camera;
+    private List<PlayerCmd> _cmd;
     public TankObject(Vector3 pos) {
         _pos = pos;
-        
+        _cmd = new List<PlayerCmd>();
     }
     void Start()
     {
-        _camera = GameObject.Find("Main Camera");
-        _camera.transform.SetParent(transform);
-        _camera.transform.position = new Vector3(0, 20, -10);
-        _camera.transform.Rotate(45.0f, 0.0f, 0.0f);
+        _cmd = new List<PlayerCmd>();
     }
 
     public void update() {
@@ -33,8 +30,23 @@ public class TankObject : MonoBehaviour
             //transform.Rotate(0.0f, h*10, 0.0f);
             ObjectManager.getInstance().uploadRotate(new Vector3(0.0f, h*10, 0.0f));
         }
+        if (_cmd == null || _cmd.Count == 0) {
+            return;
+        }
         
-        
+        PlayerCmd cmd = _cmd[0];
+        if (cmd.type == 0) {
+            PlayerMoveCmd moveCmd = JsonUtility.FromJson<PlayerMoveCmd>(cmd.cmd);
+            move(moveCmd.pos);
+        } else if (cmd.type == 1) {
+            PlayerRotateCmd roCmd = JsonUtility.FromJson<PlayerRotateCmd>(cmd.cmd);
+            rotate(roCmd.rotate);
+        }
+        _cmd.RemoveAt(0);
+    }
+
+    public void saveCmd(PlayerCmd cmd) {
+        _cmd.Add(cmd);
     }
 
     public void move(Vector3 pos) {

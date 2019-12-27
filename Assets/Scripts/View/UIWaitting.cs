@@ -10,8 +10,7 @@ public class UIWaitting : ViewBase
     public UIWaitting(string name, string path, Transform parent) : base(name, path, parent) {
         _cellDemo = getChildByName("CellDemo");
         _cellDemo.SetActive(false);
-        getChildByName("BtnStart").GetComponent<Button>().onClick.AddListener(onClickStart);
-        onAddListener();
+        getChildByName("BtnStart").GetComponent<Button>().onClick.AddListener(onBtnClickStart);
     }
 
     private GameObject getScrollViewContent() {
@@ -21,26 +20,13 @@ public class UIWaitting : ViewBase
         }
         return null;
     }
-
     override
     protected void onAddListener() {
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_PLAYER_JOIN, onPlayerJoin);
-        NetManager.getInstance().addRecvhandler("SCMsgJoinRoom", SCMsgJoinRoom);
-        NetManager.getInstance().addRecvhandler("SCMsgExitRoom", SCMsgExitRoom);
-        NetManager.getInstance().addRecvhandler("SCMsgGameStart", SCMsgGameStart);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_PLAYER_CHANGE, onEvtPlayerChange);
     }
-
     override
     protected void onRemoveListener() {
-        EventManager.getInstance().removeEventListener(EventType.EVT_ON_PLAYER_JOIN, onPlayerJoin);
-        NetManager.getInstance().removeRecvHandler("SCMsgJoinRoom", SCMsgJoinRoom);
-        NetManager.getInstance().removeRecvHandler("SCMsgExitRoom", SCMsgExitRoom);
-        NetManager.getInstance().removeRecvHandler("SCMsgGameStart", SCMsgGameStart);
-    }
-
-    override
-    protected void onEnabled() {
-        
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_PLAYER_CHANGE, onEvtPlayerChange);
     }
 
     private void createCell(PlayerInfo info) {
@@ -52,41 +38,30 @@ public class UIWaitting : ViewBase
         textname.GetComponent<Text>().text = info.name;
     }
 
-    private void onPlayerJoin(IEvent evt) {
-        string name = (string)evt.getArg("name");
+    private void updateCell(Transform cell, PlayerInfo info) {
+        cell.name = info.playerId.ToString();
+        GameObject textname = cell.Find("text_name").gameObject;
+        textname.GetComponent<Text>().text = info.name;
     }
 
-    private void SCMsgJoinRoom(string msgType, string msgVal) {
-        SCMsgJoinRoom res = JsonUtility.FromJson<SCMsgJoinRoom>(msgVal);
-        GameObject content = getScrollViewContent();
-        foreach (PlayerInfo pair in res.players) {
-            Transform cell = content.transform.Find(pair.playerId.ToString());
-            if (cell == null) {
-                createCell(pair);
-            } else {
-
-            }
-        }
-    }
-    private void SCMsgExitRoom(string msgType, string msgVal) {
-        SCMsgExitRoom res = JsonUtility.FromJson<SCMsgExitRoom>(msgVal);
-        GameObject content = getScrollViewContent();
-        foreach (PlayerInfo pair in res.players) {
-        }
-    }
-
-    private void SCMsgGameStart(string msgType, string msgVal) {
-        SCMsgGameStart res = JsonUtility.FromJson<SCMsgGameStart>(msgVal);
-        GUIManager.getInstance().showView(ViewType.GAME);
-        EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_START);
-        DataManager.getInstance().setFrame(res.frame);
-    }
-
-    private void onClickStart() {
-        CSMsgGameStart gamestart = new CSMsgGameStart();
-        string val = JsonUtility.ToJson(gamestart);
-        NetManager.getInstance().send("CSMsgGameStart", val);
+    private void onBtnClickStart() {
+        NetManager.getInstance().getNetSend().sendGameStart();
         //GUIManager.getInstance().showView(ViewType.GAME);
         //EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_START);
+    }
+
+    private void onEvtPlayerChange(IEvent evt) {
+        Debug.Log("onEvtPlayerChange");
+        List<PlayerInfo> list = DataManager.getInstance().getReadOnly().getAllPlayer();
+        GameObject content = getScrollViewContent();
+        foreach (PlayerInfo info in list) {
+            Transform cell = content.transform.Find(info.playerId.ToString());
+            if (cell == null) {
+                createCell(info);
+            } else {
+                updateCell(cell, info);
+            }
+        }
+        
     }
 }
