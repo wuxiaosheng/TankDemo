@@ -2,24 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectManager
+public class ObjectManager : MgrBase
 {
     private static ObjectManager _instance;
     private Dictionary<int, GameObject> _tanks;
     private GameObject _parent;
     private GameObject _map;
     private GameObject _camera;
+    private List<PlayerCmd> _cmds;
     public static ObjectManager getInstance() {
         if (_instance == null) {
             _instance = new ObjectManager();
         }
         return _instance;
     }
-
-    public ObjectManager() {
+    override
+    public void start() {
+        base.start();
         _tanks = new Dictionary<int, GameObject>();
         _parent = GameObject.Find("GameController");
         _camera = GameObject.Find("Main Camera");
+        _cmds = new List<PlayerCmd>();
         onAddListener();
     }
     protected void onAddListener() {
@@ -31,11 +34,15 @@ public class ObjectManager
     }
 
     public GameObject createTank(int playerId, Vector3 pos) {
-        Debug.Log(pos);
+        Debug.Log("create tank player id:"+playerId);
+        int selfId = DataManager.getInstance().getReadOnly().getSelfId();
+        Debug.Log("self player id:"+selfId);
         GameObject obj = GameObject.Instantiate(Resources.Load("Prefabs/Tank"), _parent.transform) as GameObject;
         obj.transform.position = pos;
         obj.AddComponent<TankObject>();
         _tanks.Add(playerId, obj);
+        obj.GetComponent<TankObject>()._isSelfTank = (playerId == selfId);
+        obj.GetComponent<TankObject>()._playerId = playerId;
         return obj;
     }
 
@@ -49,24 +56,30 @@ public class ObjectManager
         foreach (KeyValuePair<int, GameObject> pair in _tanks) {
             pair.Value.GetComponent<TankObject>().update();
         }
+        
+        if (_cmds.Count == 0) { return; }
+        Debug.Log(_cmds.Count);
+        foreach (KeyValuePair<int, GameObject> pair in _tanks) {
+            if (_cmds[0].playerId == pair.Key) {
+                pair.Value.GetComponent<TankObject>().updateNetCmd(_cmds[0]);
+                _cmds.RemoveAt(0);
+                break;
+            }
+        }
+        if (_cmds.Count == 0) { return; }
+        foreach (KeyValuePair<int, GameObject> pair in _tanks) {
+            if (_cmds[0].playerId == pair.Key) {
+                pair.Value.GetComponent<TankObject>().updateNetCmd(_cmds[0]);
+                _cmds.RemoveAt(0);
+                break;
+            }
+        }
     }
 
     public void updateNet(SCMsgNetFrame data) {
-        
-    }
-
-    public void uploadMove(Vector3 pos) {
-        PlayerMoveCmd move = new PlayerMoveCmd();
-        move.pos = pos;
-        string str = JsonUtility.ToJson(move);
-        NetManager.getInstance().uploadCmd(0, str);
-    }
-
-    public void uploadRotate(Vector3 rotate) {
-        PlayerRotateCmd ro = new PlayerRotateCmd();
-        ro.rotate = rotate;
-        string str = JsonUtility.ToJson(ro);
-        NetManager.getInstance().uploadCmd(1, str);
+        foreach (PlayerCmd cmd in data.cmd) {
+            _cmds.Add(cmd);
+        }
     }
 
     private void onGameStart(IEvent evt) {
@@ -78,7 +91,10 @@ public class ObjectManager
             int index = (info.playerId%10000)+1;
             Vector3 pos = _map.GetComponent<MapObject>().getBornPos(index);
             GameObject tank = createTank(info.playerId, pos);
-            attachCamera(tank);
+            FrameSyncManager.getInstance().recordTankPos(info.playerId, pos);
+            if (isSelf) {
+                attachCamera(tank);
+            }
         }
         
     }

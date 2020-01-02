@@ -42,4 +42,10 @@ public class PlayerData : DataBase
         }
         return list;
     }
+
+    public void removePlayerInfo(int playerId) {
+        if (_dict.ContainsKey(playerId)) {
+            _dict.Remove(playerId);
+        }
+    }
 }

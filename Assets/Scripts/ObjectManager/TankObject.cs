@@ -4,57 +4,56 @@ using UnityEngine;
 
 public class TankObject : MonoBehaviour
 {
+    public bool _isSelfTank;
+    public int _playerId;
+    private int _count = 0;
     // Start is called before the first frame update
-    private Vector3 _pos;
-    private List<PlayerCmd> _cmd;
-    public TankObject(Vector3 pos) {
-        _pos = pos;
-        _cmd = new List<PlayerCmd>();
+    void Start() {
     }
-    void Start()
-    {
-        _cmd = new List<PlayerCmd>();
-    }
-
     public void update() {
+        Vector3 pos = FrameSyncManager.getInstance().getTankTargetPos(_playerId, transform.position);
+        transform.position = Vector3.Lerp(transform.position, pos, 6*Time.deltaTime);
+        if (!_isSelfTank) { return; }
         float h = Input.GetAxis("Horizontal")*5;
         float v = Input.GetAxis("Vertical")*5;
         h *= Time.deltaTime;
         v *= Time.deltaTime;
         float angle = v==0.0f ? Mathf.Atan(h/v) : 0.0f;
         if (v != 0) {
-            //transform.Translate(0.0f, 0.0f, v);
-            ObjectManager.getInstance().uploadMove(new Vector3(0.0f, 0.0f, v));
+            PlayerCmd cmd = uploadMove(new Vector3(0.0f, 0.0f, v));
+            //updateNetCmd(cmd);
         }
         if (h != 0) {
-            //transform.Rotate(0.0f, h*10, 0.0f);
-            ObjectManager.getInstance().uploadRotate(new Vector3(0.0f, h*10, 0.0f));
+            PlayerCmd cmd = uploadRotate(new Vector3(0.0f, h*10, 0.0f));
+            //updateNetCmd(cmd);
         }
-        if (_cmd == null || _cmd.Count == 0) {
-            return;
-        }
-        
-        PlayerCmd cmd = _cmd[0];
+
+
+    }
+
+    public void updateNetCmd(PlayerCmd cmd) {
+        if (cmd == null) { return; }
         if (cmd.type == 0) {
-            PlayerMoveCmd moveCmd = JsonUtility.FromJson<PlayerMoveCmd>(cmd.cmd);
-            move(moveCmd.pos);
+            TankMoveCmd moveCmd = JsonUtility.FromJson<TankMoveCmd>(cmd.cmd);
+            transform.Translate(moveCmd.pos-transform.position);
         } else if (cmd.type == 1) {
-            PlayerRotateCmd roCmd = JsonUtility.FromJson<PlayerRotateCmd>(cmd.cmd);
-            rotate(roCmd.rotate);
+            TankRotateCmd roCmd = JsonUtility.FromJson<TankRotateCmd>(cmd.cmd);
+            transform.Rotate(roCmd.rotate);
         }
-        _cmd.RemoveAt(0);
     }
 
-    public void saveCmd(PlayerCmd cmd) {
-        _cmd.Add(cmd);
+    private PlayerCmd uploadMove(Vector3 pos) {
+        TankMoveCmd cmd = new TankMoveCmd();
+        cmd.pos = transform.position+pos;
+        string str = JsonUtility.ToJson(cmd);
+        return NetManager.getInstance().getNetSend().uploadNet(0, str);
     }
 
-    public void move(Vector3 pos) {
-        transform.Translate(pos);
-    }
-
-    public void rotate(Vector3 ro) {
-        transform.Rotate(ro);
+    private PlayerCmd uploadRotate(Vector3 ro) {
+        TankRotateCmd cmd = new TankRotateCmd();
+        cmd.rotate = ro;
+        string str = JsonUtility.ToJson(cmd);
+        return NetManager.getInstance().getNetSend().uploadNet(1, str);
     }
 
 

@@ -18,4 +18,17 @@ public class NetSend
         string val = JsonUtility.ToJson(gamestart);
         NetManager.getInstance().send("CSMsgGameStart", val);
     }
+
+    public PlayerCmd uploadNet(int type, string cmdStr) {
+        CSMsgNetFrame msg = new CSMsgNetFrame();
+        PlayerCmd cmd = new PlayerCmd();
+        cmd.cmd = cmdStr;
+        cmd.type = type;
+        cmd.playerId = DataManager.getInstance().getReadOnly().getSelfId();
+        msg.frame = DataManager.getInstance().getReadOnly().getFrame()+1;
+        msg.cmd = cmd;
+        string val = JsonUtility.ToJson(msg);
+        NetManager.getInstance().send("CSMsgNetFrame", val);
+        return cmd;
+    }
 }

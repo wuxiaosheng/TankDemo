@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GUIManager
+public class GUIManager : MgrBase
 {
     private static GUIManager _instance;
     private Dictionary<string, ViewBase> _dict;
@@ -14,7 +14,9 @@ public class GUIManager
         }
         return _instance;
     }
-    public GUIManager() {
+    override
+    public void start() {
+        base.start();
         _dict = new Dictionary<string, ViewBase>();
         _root = GameObject.Find("ViewPanel");
         _status = new ViewStatus();

@@ -18,7 +18,6 @@ public class EventManager : IEventManager
         _dict = new Dictionary<EventType, IEventHandler>();
         _queue = new Queue<IEvent>();
     }
-
     public bool addEventListener(EventType gEvt, Handler handler) {
         bool bRet;
         if (!_dict.ContainsKey(gEvt)) {

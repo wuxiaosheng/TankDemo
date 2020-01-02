@@ -1,6 +1,4 @@
 *.meta
-*.txt
-*.dwlt
 Library/metadata/
 Library/PackageCache/
 *.pdb

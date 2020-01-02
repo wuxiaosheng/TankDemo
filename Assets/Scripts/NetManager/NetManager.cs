@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
-public class NetManager
+public class NetManager : MgrBase
 {
     public delegate void recvHandler(string msgType, string msgVal);
     private Socket _socket;
@@ -15,16 +15,18 @@ public class NetManager
     private Dictionary<string, recvHandler> _handlers;
     private NetRecv _recv;
     private NetSend _send;
+    private byte[] _recvBuffer;
     public static NetManager getInstance() {
         if (_instance == null) {
             _instance = new NetManager();
         }
         return _instance;
     }
-
-    public NetManager() {
+    override
+    public void start() {
+        base.start();
         _handlers = new Dictionary<string, recvHandler>();
-        
+        _recvBuffer = new byte[2048];
         onAddListener();
     }
 
@@ -47,10 +49,8 @@ public class NetManager
 
     private void onAddListener() {
         EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_DISPATCH_MSG, onDispatchMsg);
-        
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_DISPATCH_MSG, onDispatchMsg);   
     }
-
     public void addRecvhandler(string key, recvHandler handler) {
         if (_handlers.ContainsKey(key)) {
             _handlers[key] += handler;
@@ -74,11 +74,10 @@ public class NetManager
     private void send(string content) {
         if (_socket == null || !_socket.Connected) { return; }
         content += ";";
-        byte[] buffer = new byte[1024];
-        buffer = Encoding.UTF8.GetBytes(content);
+        byte[] sendBuff = Encoding.UTF8.GetBytes(content);
         SocketAsyncEventArgs sendArgs = new SocketAsyncEventArgs();
         sendArgs.RemoteEndPoint = _point;
-        sendArgs.SetBuffer(buffer, 0, buffer.Length);
+        sendArgs.SetBuffer(sendBuff, 0, sendBuff.Length);
         _socket.SendAsync(sendArgs);
     }
 
@@ -92,23 +91,10 @@ public class NetManager
 
     public void recv() {
         SocketAsyncEventArgs receiveArgs = new SocketAsyncEventArgs();
-        byte[] buffer = new byte[1024*512];
-        receiveArgs.SetBuffer(buffer, 0, buffer.Length);
+        receiveArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
         receiveArgs.RemoteEndPoint = _point;
         receiveArgs.Completed += onRecv;
         _socket.ReceiveAsync(receiveArgs);
-    }
-
-    public void uploadCmd(int type, string cmdStr) {
-        CSMsgNetFrame msg = new CSMsgNetFrame();
-        PlayerCmd cmd = new PlayerCmd();
-        cmd.cmd = cmdStr;
-        cmd.type = type;
-        cmd.playerId = DataManager.getInstance().getReadOnly().getSelfId();
-        msg.frame = DataManager.getInstance().getReadOnly().getFrame();
-        msg.cmd = cmd;
-        string val = JsonUtility.ToJson(msg);
-        send("CSMsgNetFrame", val);
     }
 
     private void onConnected(object sender,SocketAsyncEventArgs args) {

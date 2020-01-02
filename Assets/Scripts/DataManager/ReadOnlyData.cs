@@ -33,4 +33,10 @@ public class ReadOnlyData
         if (data == null) { return null; }
         return ((PlayerData)data).getAllPlayerInfo();
     }
+
+    public int getRoomOwnerId() {
+        DataBase data = _delegate("GameData");
+        if (data == null) { return 0; }
+        return ((GameData)data).getOwnerId();
+    }
 }

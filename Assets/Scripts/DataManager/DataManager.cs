@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DataManager
+public class DataManager : MgrBase
 {
     
     private static DataManager _instance;
@@ -15,8 +15,9 @@ public class DataManager
         }
         return _instance;
     }
-
-    public DataManager() {
+    override
+    public void start() {
+        base.start();
         _dict = new Dictionary<string, DataBase>();
         _readOnly = new ReadOnlyData();
         _readOnly.delegateGetDataMethod(getDataByName);
@@ -26,7 +27,6 @@ public class DataManager
         _dict["ItemData"] = new ItemData();
         _dict["PlayerData"] = new PlayerData();
     }
-
     private DataBase getDataByName(string name) {
         if (_dict.ContainsKey(name)) {
             return _dict[name];

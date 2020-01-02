@@ -21,27 +21,20 @@ public class NetRecv
     }
     private void SCMsgJoinRoom(string msgType, string msgVal) {
         Debug.Log("SCMsgJoinRoom");
+        Debug.Log(msgVal);
         SCMsgJoinRoom res = JsonUtility.FromJson<SCMsgJoinRoom>(msgVal);
+        DataManager.getInstance().getWirteOnly().setRoomOwnerId(res.ownerId);
         foreach (PlayerInfo pair in res.players) {
             DataManager.getInstance().getWirteOnly().addPlayer(pair.playerId, pair);
         }
         EventManager.getInstance().broadcast(EventType.EVT_ON_PLAYER_CHANGE);
-        /*GameObject content = getScrollViewContent();
-        foreach (PlayerInfo pair in res.players) {
-            Transform cell = content.transform.Find(pair.playerId.ToString());
-            if (cell == null) {
-                createCell(pair);
-            } else {
-
-            }
-        }*/
     }
     private void SCMsgExitRoom(string msgType, string msgVal) {
-        Debug.Log("SCMsgJoinRoom");
-        /*SCMsgExitRoom res = JsonUtility.FromJson<SCMsgExitRoom>(msgVal);
-        GameObject content = getScrollViewContent();
-        foreach (PlayerInfo pair in res.players) {
-        }*/
+        Debug.Log("SCMsgExitRoom");
+        SCMsgExitRoom res = JsonUtility.FromJson<SCMsgExitRoom>(msgVal);
+        PlayerInfo player = res.player;
+        DataManager.getInstance().getWirteOnly().removePlayer(player.playerId);
+        EventManager.getInstance().broadcast(EventType.EVT_ON_PLAYER_CHANGE);
     }
     private void SCMsgGameStart(string msgType, string msgVal) {
         SCMsgGameStart res = JsonUtility.FromJson<SCMsgGameStart>(msgVal);
@@ -50,6 +43,7 @@ public class NetRecv
         EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_START);
     }
     private void SCMsgNetFrame(string msgType, string msgVal) {
+        Debug.Log(msgVal);
         SCMsgNetFrame res = JsonUtility.FromJson<SCMsgNetFrame>(msgVal);
         DataManager.getInstance().getWirteOnly().setFrame(res.frame);
         EventManager.getInstance().broadcast(EventType.EVT_ON_NET_UPDATE, "NetFrameData", res);

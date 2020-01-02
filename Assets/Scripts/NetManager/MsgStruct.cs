@@ -26,13 +26,20 @@ public class PlayerInfo {
 }
 
 [System.Serializable]
+public class GamePlayerInfo {
+    public Vector3 pos;
+    public Vector3 ro;
+}
+
+[System.Serializable]
 public class SCMsgJoinRoom {
     public PlayerInfo[] players;
+    public int ownerId;
 }
 
 [System.Serializable]
 public class SCMsgExitRoom {
-    public PlayerInfo[] players;
+    public PlayerInfo player;
 }
 
 [System.Serializable]
@@ -59,10 +66,10 @@ public class CSMsgNetFrame {
     public PlayerCmd cmd;
 }
 [System.Serializable]
-public class PlayerMoveCmd {
+public class TankMoveCmd {
     public Vector3 pos;
 }
 [System.Serializable]
-public class PlayerRotateCmd {
+public class TankRotateCmd {
     public Vector3 rotate;
 }

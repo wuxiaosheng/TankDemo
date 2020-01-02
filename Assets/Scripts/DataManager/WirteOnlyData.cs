@@ -33,4 +33,16 @@ public class WirteOnlyData
         if (data == null) { return; }
         ((PlayerData)data).revisePlayerInfo(playerId, info);
     }
+
+    public void removePlayer(int playerId) {
+        DataBase data = _delegate("PlayerData");
+        if (data == null) { return; }
+        ((PlayerData)data).removePlayerInfo(playerId);
+    }
+
+    public void setRoomOwnerId(int playerId) {
+        DataBase data = _delegate("GameData");
+        if (data == null) { return; }
+        ((GameData)data).setOwnerId(playerId);
+    }
 }
