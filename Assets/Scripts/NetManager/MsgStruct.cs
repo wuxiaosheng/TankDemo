@@ -26,7 +26,7 @@ public class PlayerInfo {
 }
 
 [System.Serializable]
-public class GamePlayerInfo {
+public class TankInfo {
     public Vector3 pos;
     public Vector3 ro;
 }

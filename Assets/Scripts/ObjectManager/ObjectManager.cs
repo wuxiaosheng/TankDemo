@@ -34,16 +34,22 @@ public class ObjectManager : MgrBase
     }
 
     public GameObject createTank(int playerId, Vector3 pos) {
-        Debug.Log("create tank player id:"+playerId);
         int selfId = DataManager.getInstance().getReadOnly().getSelfId();
-        Debug.Log("self player id:"+selfId);
         GameObject obj = GameObject.Instantiate(Resources.Load("Prefabs/Tank"), _parent.transform) as GameObject;
         obj.transform.position = pos;
         obj.AddComponent<TankObject>();
-        _tanks.Add(playerId, obj);
         obj.GetComponent<TankObject>()._isSelfTank = (playerId == selfId);
         obj.GetComponent<TankObject>()._playerId = playerId;
+        obj.GetComponent<TankObject>().start();
+        _tanks.Add(playerId, obj);
         return obj;
+    }
+
+    public GameObject getTank(int playerId) {
+        if (_tanks.ContainsKey(playerId)) {
+            return _tanks[playerId];
+        }
+        return null;
     }
 
     private void createMap() {
@@ -56,34 +62,9 @@ public class ObjectManager : MgrBase
         foreach (KeyValuePair<int, GameObject> pair in _tanks) {
             pair.Value.GetComponent<TankObject>().update();
         }
-        
-        if (_cmds.Count == 0) { return; }
-        Debug.Log(_cmds.Count);
-        foreach (KeyValuePair<int, GameObject> pair in _tanks) {
-            if (_cmds[0].playerId == pair.Key) {
-                pair.Value.GetComponent<TankObject>().updateNetCmd(_cmds[0]);
-                _cmds.RemoveAt(0);
-                break;
-            }
-        }
-        if (_cmds.Count == 0) { return; }
-        foreach (KeyValuePair<int, GameObject> pair in _tanks) {
-            if (_cmds[0].playerId == pair.Key) {
-                pair.Value.GetComponent<TankObject>().updateNetCmd(_cmds[0]);
-                _cmds.RemoveAt(0);
-                break;
-            }
-        }
-    }
-
-    public void updateNet(SCMsgNetFrame data) {
-        foreach (PlayerCmd cmd in data.cmd) {
-            _cmds.Add(cmd);
-        }
     }
 
     private void onGameStart(IEvent evt) {
-        Debug.Log("ObjectManager onGameStart");
         createMap();
         List<PlayerInfo> list = DataManager.getInstance().getReadOnly().getAllPlayer();
         foreach (PlayerInfo info in list) {
@@ -91,7 +72,6 @@ public class ObjectManager : MgrBase
             int index = (info.playerId%10000)+1;
             Vector3 pos = _map.GetComponent<MapObject>().getBornPos(index);
             GameObject tank = createTank(info.playerId, pos);
-            FrameSyncManager.getInstance().recordTankPos(info.playerId, pos);
             if (isSelf) {
                 attachCamera(tank);
             }

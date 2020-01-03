@@ -20,8 +20,6 @@ public class NetRecv
         }
     }
     private void SCMsgJoinRoom(string msgType, string msgVal) {
-        Debug.Log("SCMsgJoinRoom");
-        Debug.Log(msgVal);
         SCMsgJoinRoom res = JsonUtility.FromJson<SCMsgJoinRoom>(msgVal);
         DataManager.getInstance().getWirteOnly().setRoomOwnerId(res.ownerId);
         foreach (PlayerInfo pair in res.players) {

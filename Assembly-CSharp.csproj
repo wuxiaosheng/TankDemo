@@ -69,6 +69,7 @@
      <Compile Include="Assets\Scripts\EventManager\IEventHandler.cs" />
      <Compile Include="Assets\Scripts\EventManager\IEventManager.cs" />
      <Compile Include="Assets\Scripts\FrameSyncManager\FrameSyncManager.cs" />
+     <Compile Include="Assets\Scripts\FrameSyncManager\TankLogicSync.cs" />
      <Compile Include="Assets\Scripts\GameCtrl.cs" />
      <Compile Include="Assets\Scripts\GUIManager\GUIManager.cs" />
      <Compile Include="Assets\Scripts\GUIManager\ViewBase.cs" />

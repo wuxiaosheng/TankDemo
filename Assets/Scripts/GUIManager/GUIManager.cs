@@ -43,10 +43,6 @@ public class GUIManager : MgrBase
         }
     }
 
-    public void updateNet(SCMsgNetFrame data) {
-
-    }
-
     public void addView(string name, ViewBase view) {
         _dict.Add(name, view);
     }
