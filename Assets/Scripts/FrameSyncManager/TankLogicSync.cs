@@ -7,9 +7,12 @@ public class TankLogicSync
     private PlayerInfo _accountInfo;
     private TankInfo _originInfo;
     private TankInfo _changeInfo;
-    private float _angleChange;
+    private List<float> _fireList;
+    private List<float> _rotateList;
     public void start(PlayerInfo info) {
         _accountInfo = info;
+        _fireList = new List<float>();
+        _rotateList = new List<float>();
         GameObject obj = ObjectManager.getInstance().getTank(_accountInfo.playerId);
         _changeInfo = new TankInfo();
         if (!obj) { return; }
@@ -20,8 +23,22 @@ public class TankLogicSync
         return _originInfo.pos+_changeInfo.pos;
     }
 
+    public Vector3 getTankChangeRo() {
+        if (_rotateList.Count == 0) { return new Vector3(0.0f, 0.0f, 0.0f);}
+        float val = _rotateList[0];
+        _rotateList.RemoveAt(0);
+        return new Vector3(0.0f, val, 0.0f);
+    }
+
     public Vector3 getTankTarRo() {
         return _originInfo.ro+_changeInfo.ro;
+    }
+
+    public float getTankFireForce() {
+        if (_fireList.Count == 0) { return 0.0f;}
+        float val = _fireList[0];
+        _fireList.RemoveAt(0);
+        return val;
     }
 
     public void onChangePos(Vector3 pos) {
@@ -30,5 +47,10 @@ public class TankLogicSync
 
     public void onChangeRotate(Vector3 rotate) {
         _changeInfo.ro += rotate;
+        _rotateList.Add(rotate.y);
+    }
+
+    public void onFire(float force) {
+        _fireList.Add(force);
     }
 }

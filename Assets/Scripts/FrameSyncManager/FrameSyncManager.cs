@@ -59,6 +59,8 @@ public class FrameSyncManager : MgrBase
                 onDealMove(cmd.playerId, cmd.cmd);
             } else if (cmd.type == 1) {
                 onDealRotate(cmd.playerId, cmd.cmd);
+            } else if (cmd.type == 2) {
+                onDealFire(cmd.playerId, cmd.cmd);
             }
         }
     }
@@ -82,6 +84,12 @@ public class FrameSyncManager : MgrBase
         TankRotateCmd cmd = JsonUtility.FromJson<TankRotateCmd>(content);
         if (_tanks.ContainsKey(playerId)) {
             _tanks[playerId].onChangeRotate(cmd.rotate);
+        }
+    }
+    private void onDealFire(int playerId, string content) {
+        TankFireCmd cmd = JsonUtility.FromJson<TankFireCmd>(content);
+        if (_tanks.ContainsKey(playerId)) {
+            _tanks[playerId].onFire(cmd.force);
         }
     }
 }

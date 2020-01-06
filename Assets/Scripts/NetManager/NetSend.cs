@@ -20,6 +20,7 @@ public class NetSend
     }
 
     public PlayerCmd uploadNet(int type, string cmdStr) {
+        //((UIGame)GUIManager.getInstance().getView("UIGame")).createLog(cmdStr);
         CSMsgNetFrame msg = new CSMsgNetFrame();
         PlayerCmd cmd = new PlayerCmd();
         cmd.cmd = cmdStr;

@@ -17,6 +17,7 @@ public class MapObject : MonoBehaviour
     }
 
     public Vector3 getBornPos(int index) {
+        index %= 8;
         Transform point = transform.Find("BornPoints").Find("point"+index);
         if (point) {
             return point.position;

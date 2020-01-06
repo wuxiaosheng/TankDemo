@@ -73,3 +73,7 @@ public class TankMoveCmd {
 public class TankRotateCmd {
     public Vector3 rotate;
 }
+[System.Serializable]
+public class TankFireCmd {
+    public float force;
+}

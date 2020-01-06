@@ -32,7 +32,7 @@ public class GameCtrl : MonoBehaviour
         
         
         GUIManager.getInstance().showView(ViewType.LOGIN);
-        NetManager.getInstance().start("192.168.1.10", 19904);
+        NetManager.getInstance().startConnect("192.168.1.10", 19904);
         onAddListener();
     }
 
@@ -49,7 +49,6 @@ public class GameCtrl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
         
         EventManager.getInstance().update();
         GUIManager.getInstance().update();

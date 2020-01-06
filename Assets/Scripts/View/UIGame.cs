@@ -12,8 +12,11 @@ public class UIGame : ViewBase
     private int _frameUpdate=0;//帧数;
     
     private int _fps=0;
+    private GameObject _cellDemo;
     public UIGame(string name, string path, Transform parent) : base(name, path, parent) {
         _lastUpdateShowTime=Time.realtimeSinceStartup;
+        _cellDemo = getChildByName("TextDemo");
+        _cellDemo.SetActive(false);
     }
     override
     protected void onAddListener() {
@@ -33,6 +36,21 @@ public class UIGame : ViewBase
             _frameUpdate = 0;
             _lastUpdateShowTime=Time.realtimeSinceStartup;
         }
-        getChildByName("text_frame").GetComponent<Text>().text = _fps.ToString();
+        getChildByName("TextFrame").GetComponent<Text>().text = _fps.ToString();
+    }
+
+    public void createLog(string log) {
+        GameObject content = getScrollViewContent();
+        GameObject cellClone = GameObject.Instantiate(_cellDemo, content.transform);
+        cellClone.SetActive(true);
+        cellClone.GetComponent<Text>().text = log;
+    }
+
+    private GameObject getScrollViewContent() {
+        GameObject scrollView = this.getChildByName("SVLogList");
+        if (scrollView) {
+            return scrollView.transform.Find("Viewport").Find("Content").gameObject;
+        }
+        return null;
     }
 }

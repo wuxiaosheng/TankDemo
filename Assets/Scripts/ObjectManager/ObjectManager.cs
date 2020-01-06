@@ -10,6 +10,7 @@ public class ObjectManager : MgrBase
     private GameObject _map;
     private GameObject _camera;
     private List<PlayerCmd> _cmds;
+    private Dictionary<int, GameObject> _bullets;
     public static ObjectManager getInstance() {
         if (_instance == null) {
             _instance = new ObjectManager();
@@ -27,10 +28,12 @@ public class ObjectManager : MgrBase
     }
     protected void onAddListener() {
         EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onGameStart);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_FIRE, onFire);
     }
 
     protected void onRemoveListener() {
         EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onGameStart);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_FIRE, onFire);
     }
 
     public GameObject createTank(int playerId, Vector3 pos) {
@@ -58,25 +61,19 @@ public class ObjectManager : MgrBase
         _map = obj;
     }
 
+    private void createBullet(int playerId, float force, Vector3 pos, Quaternion ro, Vector3 forward) {
+        GameObject bullet = GameObject.Instantiate(Resources.Load("Prefabs/Shell"), _parent.transform) as GameObject;
+        bullet.transform.position = pos;
+        bullet.transform.rotation = ro;
+        bullet.AddComponent<BulletObject>();
+        bullet.AddComponent<BulletObject>().addForce(force, forward);
+        //_bullets.Add(playerId, bullet);
+    }
+
     public void update() {
         foreach (KeyValuePair<int, GameObject> pair in _tanks) {
             pair.Value.GetComponent<TankObject>().update();
         }
-    }
-
-    private void onGameStart(IEvent evt) {
-        createMap();
-        List<PlayerInfo> list = DataManager.getInstance().getReadOnly().getAllPlayer();
-        foreach (PlayerInfo info in list) {
-            bool isSelf = DataManager.getInstance().getReadOnly().getSelfId() == info.playerId;
-            int index = (info.playerId%10000)+1;
-            Vector3 pos = _map.GetComponent<MapObject>().getBornPos(index);
-            GameObject tank = createTank(info.playerId, pos);
-            if (isSelf) {
-                attachCamera(tank);
-            }
-        }
-        
     }
 
     private void attachCamera(GameObject obj) {
@@ -85,5 +82,27 @@ public class ObjectManager : MgrBase
         _camera.transform.SetParent(obj.transform);
         _camera.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y+20, obj.transform.position.z-10);
         _camera.transform.Rotate(45.0f, 0.0f, 0.0f);
+    }
+
+    private void onGameStart(IEvent evt) {
+        createMap();
+        List<PlayerInfo> list = DataManager.getInstance().getReadOnly().getAllPlayer();
+        foreach (PlayerInfo info in list) {
+            bool isSelf = DataManager.getInstance().getReadOnly().getSelfId() == info.playerId;
+            Vector3 pos = _map.GetComponent<MapObject>().getBornPos(info.playerId%10000);
+            GameObject tank = createTank(info.playerId, pos);
+            if (isSelf) {
+                attachCamera(tank);
+            }
+        }
+    }
+
+    private void onFire(IEvent evt) {
+        float force = (float)evt.getArg("force");
+        Vector3 pos = (Vector3)evt.getArg("pos");
+        Quaternion ro = (Quaternion)evt.getArg("ro");
+        Vector3 forward = (Vector3)evt.getArg("forward");
+        int playerId = (int)evt.getArg("playerId");
+        createBullet(playerId, force, pos, ro, forward);
     }
 }

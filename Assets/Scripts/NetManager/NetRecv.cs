@@ -28,7 +28,6 @@ public class NetRecv
         EventManager.getInstance().broadcast(EventType.EVT_ON_PLAYER_CHANGE);
     }
     private void SCMsgExitRoom(string msgType, string msgVal) {
-        Debug.Log("SCMsgExitRoom");
         SCMsgExitRoom res = JsonUtility.FromJson<SCMsgExitRoom>(msgVal);
         PlayerInfo player = res.player;
         DataManager.getInstance().getWirteOnly().removePlayer(player.playerId);
@@ -41,7 +40,6 @@ public class NetRecv
         EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_START);
     }
     private void SCMsgNetFrame(string msgType, string msgVal) {
-        Debug.Log(msgVal);
         SCMsgNetFrame res = JsonUtility.FromJson<SCMsgNetFrame>(msgVal);
         DataManager.getInstance().getWirteOnly().setFrame(res.frame);
         EventManager.getInstance().broadcast(EventType.EVT_ON_NET_UPDATE, "NetFrameData", res);

@@ -122,7 +122,7 @@ GameObject:
   m_Component:
   - component: {fileID: 81597207}
   m_Layer: 0
-  m_Name: point2
+  m_Name: point1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -136,7 +136,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 81597206}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 26.48, y: 0, z: -29.14}
+  m_LocalPosition: {x: 26.48, y: 0.1, z: -29.14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 466596921}
@@ -362,7 +362,7 @@ GameObject:
   m_Component:
   - component: {fileID: 897271234}
   m_Layer: 0
-  m_Name: point7
+  m_Name: point6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -376,7 +376,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 897271233}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 30.88, y: 0, z: 35.9}
+  m_LocalPosition: {x: 39.05, y: 0.1, z: 5.47}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 466596921}
@@ -474,7 +474,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1077400171}
   m_Layer: 0
-  m_Name: point1
+  m_Name: point0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -488,7 +488,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1077400170}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -31.7}
+  m_LocalPosition: {x: 0, y: 0.1, z: -31.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 466596921}
@@ -504,7 +504,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1128760944}
   m_Layer: 0
-  m_Name: point3
+  m_Name: point2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -518,7 +518,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1128760943}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -38.89, y: 0, z: -29.14}
+  m_LocalPosition: {x: -35.38, y: 0.1, z: -25.84}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 466596921}
@@ -633,7 +633,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1902521562}
   m_Layer: 0
-  m_Name: point6
+  m_Name: point5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -647,7 +647,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1902521561}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 14.8, y: 0, z: 35.9}
+  m_LocalPosition: {x: 14.8, y: 0.1, z: 35.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 466596921}
@@ -663,7 +663,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1968113001}
   m_Layer: 0
-  m_Name: point5
+  m_Name: point4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -677,7 +677,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1968113000}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -7.2, y: 0, z: 37.8}
+  m_LocalPosition: {x: -7.2, y: 0.1, z: 37.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 466596921}
@@ -693,7 +693,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1989795572}
   m_Layer: 0
-  m_Name: point8
+  m_Name: point7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -707,7 +707,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1989795571}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 39.83, y: 0, z: 10.88}
+  m_LocalPosition: {x: 39.82, y: 0.1, z: -29.43}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 466596921}
@@ -795,7 +795,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2082242401}
   m_Layer: 0
-  m_Name: point4
+  m_Name: point3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -809,7 +809,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2082242400}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -34.7, y: 0, z: 37.8}
+  m_LocalPosition: {x: -31.21, y: 0.1, z: 36.57}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 466596921}

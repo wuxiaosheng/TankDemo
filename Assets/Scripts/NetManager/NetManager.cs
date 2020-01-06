@@ -26,7 +26,7 @@ public class NetManager : MgrBase
     public void start() {
         base.start();
         _handlers = new Dictionary<string, recvHandler>();
-        _recvBuffer = new byte[2048];
+        _recvBuffer = new byte[1024*32];
         onAddListener();
     }
 
@@ -38,7 +38,7 @@ public class NetManager : MgrBase
         return _recv;
     }
 
-    public void start(string ip, int port) {
+    public void startConnect(string ip, int port) {
         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         SocketAsyncEventArgs args = new SocketAsyncEventArgs();
         _point = new IPEndPoint(IPAddress.Parse(ip), port);
@@ -119,10 +119,11 @@ public class NetManager : MgrBase
                  MsgPack pack = JsonUtility.FromJson<MsgPack>(pair);
                  EventManager.getInstance().trigger(EventType.EVT_ON_DISPATCH_MSG, "MsgPack", pack);
              }
-             recv();
-             //JsonUtility.ToJson()
-             //解析出来MsgType 然后找出handler响应
+             _socket.ReceiveAsync(args);
+        } else if (args.BytesTransferred == 0) {
+            _socket.Close();
         } else {
+            ((UIGame)GUIManager.getInstance().getView("UIGame")).createLog("recv failure");
             Debug.Log("recv failure");
         }
         
