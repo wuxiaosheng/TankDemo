@@ -10,7 +10,7 @@ public class ObjectManager : MgrBase
     private GameObject _map;
     private GameObject _camera;
     private List<PlayerCmd> _cmds;
-    private Dictionary<int, GameObject> _bullets;
+    private Dictionary<int, List<GameObject>> _bullets;
     public static ObjectManager getInstance() {
         if (_instance == null) {
             _instance = new ObjectManager();
@@ -24,16 +24,19 @@ public class ObjectManager : MgrBase
         _parent = GameObject.Find("GameController");
         _camera = GameObject.Find("Main Camera");
         _cmds = new List<PlayerCmd>();
+        _bullets = new Dictionary<int, List<GameObject>>();
         onAddListener();
     }
     protected void onAddListener() {
         EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onGameStart);
         EventManager.getInstance().addEventListener(EventType.EVT_ON_FIRE, onFire);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_BULLET_COLLISION, onBulletCollision);
     }
 
     protected void onRemoveListener() {
         EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onGameStart);
         EventManager.getInstance().removeEventListener(EventType.EVT_ON_FIRE, onFire);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_BULLET_COLLISION, onBulletCollision);
     }
 
     public GameObject createTank(int playerId, Vector3 pos) {
@@ -44,6 +47,7 @@ public class ObjectManager : MgrBase
         obj.GetComponent<TankObject>()._isSelfTank = (playerId == selfId);
         obj.GetComponent<TankObject>()._playerId = playerId;
         obj.GetComponent<TankObject>().start();
+        obj.layer = LayerMask.NameToLayer("Players");
         _tanks.Add(playerId, obj);
         return obj;
     }
@@ -67,12 +71,36 @@ public class ObjectManager : MgrBase
         bullet.transform.rotation = ro;
         bullet.AddComponent<BulletObject>();
         bullet.AddComponent<BulletObject>().addForce(force, forward);
-        //_bullets.Add(playerId, bullet);
+        if (!_bullets.ContainsKey(playerId)) {
+            _bullets.Add(playerId, new List<GameObject>());
+        }
+        _bullets[playerId].Add(bullet);
     }
 
     public void update() {
-        foreach (KeyValuePair<int, GameObject> pair in _tanks) {
-            pair.Value.GetComponent<TankObject>().update();
+        foreach (int key in _tanks.Keys) {
+            TankObject obj = _tanks[key].GetComponent<TankObject>();
+            obj.update();
+        }
+        foreach (int key in _tanks.Keys) {
+            TankObject obj = _tanks[key].GetComponent<TankObject>();
+            if (obj.isNeedRemove()) {
+                obj.onRemove();
+                _tanks.Remove(key);
+                break;
+            }
+        }
+        foreach (KeyValuePair<int, List<GameObject>> pair in _bullets) {
+            for (int i = pair.Value.Count-1; i >= 0; i--) {
+                BulletObject obj = pair.Value[i].GetComponent<BulletObject>();
+                if (obj.isNeedRemove()) {
+                    obj.onRemove();
+                    pair.Value.RemoveAt(i);
+                    continue;
+                } else {
+                    obj.update();
+                }
+            }
         }
     }
 
@@ -104,5 +132,13 @@ public class ObjectManager : MgrBase
         Vector3 forward = (Vector3)evt.getArg("forward");
         int playerId = (int)evt.getArg("playerId");
         createBullet(playerId, force, pos, ro, forward);
+    }
+
+    private void onBulletCollision(IEvent evt) {
+        GameObject obj = (GameObject)evt.getArg("ColliObject");
+        TankObject tank = obj.GetComponent<TankObject>();
+        BulletObject bullet = ((GameObject)evt.getArg("bullet")).GetComponent<BulletObject>();
+        if (tank == null) { return; }
+        tank.onBulletHit(bullet);
     }
 }

@@ -9,13 +9,11 @@ using System.Text.RegularExpressions;
 public class NetManager : MgrBase
 {
     public delegate void recvHandler(string msgType, string msgVal);
-    private Socket _socket;
-    private IPEndPoint _point;
     private static NetManager _instance;
     private Dictionary<string, recvHandler> _handlers;
     private NetRecv _recv;
     private NetSend _send;
-    private byte[] _recvBuffer;
+    private NetSocket _socket;
     public static NetManager getInstance() {
         if (_instance == null) {
             _instance = new NetManager();
@@ -26,7 +24,6 @@ public class NetManager : MgrBase
     public void start() {
         base.start();
         _handlers = new Dictionary<string, recvHandler>();
-        _recvBuffer = new byte[1024*32];
         onAddListener();
     }
 
@@ -39,16 +36,13 @@ public class NetManager : MgrBase
     }
 
     public void startConnect(string ip, int port) {
-        _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-        _point = new IPEndPoint(IPAddress.Parse(ip), port);
-        args.RemoteEndPoint = _point;
-        args.Completed += onConnected;
-        _socket.ConnectAsync(args);
+        _socket = new NetSocket(ip, port);
     }
 
     private void onAddListener() {
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_LOG_VIEW, onLogView);
         EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_DISCONNECTED, onDisconnected);
         EventManager.getInstance().addEventListener(EventType.EVT_ON_DISPATCH_MSG, onDispatchMsg);   
     }
     public void addRecvhandler(string key, recvHandler handler) {
@@ -72,61 +66,11 @@ public class NetManager : MgrBase
     }
 
     private void send(string content) {
-        if (_socket == null || !_socket.Connected) { return; }
-        content += ";";
-        byte[] sendBuff = Encoding.UTF8.GetBytes(content);
-        SocketAsyncEventArgs sendArgs = new SocketAsyncEventArgs();
-        sendArgs.RemoteEndPoint = _point;
-        sendArgs.SetBuffer(sendBuff, 0, sendBuff.Length);
-        _socket.SendAsync(sendArgs);
+        _socket.send(content);
     }
 
     public void send(string msgType, string msgVal) {
-        MsgPack pack = new MsgPack();
-        pack.msgType = msgType;
-        pack.msgVal = msgVal;
-        string content = JsonUtility.ToJson(pack);
-        send(content);
-    }
-
-    public void recv() {
-        SocketAsyncEventArgs receiveArgs = new SocketAsyncEventArgs();
-        receiveArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
-        receiveArgs.RemoteEndPoint = _point;
-        receiveArgs.Completed += onRecv;
-        _socket.ReceiveAsync(receiveArgs);
-    }
-
-    private void onConnected(object sender,SocketAsyncEventArgs args) {
-        if (args.SocketError == SocketError.Success) {
-            //连接成功
-            EventManager.getInstance().trigger(EventType.EVT_ON_CONNECTED);
-            recv();
-        } else {
-            //连接失败
-            _socket.Close();
-        }
-    }
-
-    private void onRecv(object sender,SocketAsyncEventArgs args) {
-        if (args.SocketError == SocketError.Success && args.BytesTransferred > 0) {
-            byte[] bytes = new byte[args.BytesTransferred];
-             System.Buffer.BlockCopy(args.Buffer, 0, bytes, 0, bytes.Length);
-             string content = Encoding.UTF8.GetString(bytes,0, bytes.Length);
-             string[] sArray=Regex.Split(content, ";", RegexOptions.IgnoreCase);
-             foreach (string pair in sArray) {
-                 if (pair.Length == 0) { continue; }
-                 MsgPack pack = JsonUtility.FromJson<MsgPack>(pair);
-                 EventManager.getInstance().trigger(EventType.EVT_ON_DISPATCH_MSG, "MsgPack", pack);
-             }
-             _socket.ReceiveAsync(args);
-        } else if (args.BytesTransferred == 0) {
-            _socket.Close();
-        } else {
-            ((UIGame)GUIManager.getInstance().getView("UIGame")).createLog("recv failure");
-            Debug.Log("recv failure");
-        }
-        
+        _socket.send(msgType, msgVal);
     }
 
     private void onDispatchMsg(IEvent evt) {
@@ -139,5 +83,14 @@ public class NetManager : MgrBase
     private void onServerConnected(IEvent evt) {
         _recv = new NetRecv();
         _send = new NetSend();
+    }
+
+    private void onDisconnected(IEvent evt) {
+
+    }
+
+    private void onLogView(IEvent evt) {
+        //if (GUIManager.getInstance().getView("UIGame") == null) { return; }
+        //((UIGame)GUIManager.getInstance().getView("UIGame")).createLog((string)evt.getArg("str"));
     }
 }

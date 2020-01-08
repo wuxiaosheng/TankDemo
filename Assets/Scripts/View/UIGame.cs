@@ -17,6 +17,7 @@ public class UIGame : ViewBase
         _lastUpdateShowTime=Time.realtimeSinceStartup;
         _cellDemo = getChildByName("TextDemo");
         _cellDemo.SetActive(false);
+        getChildByName("SVLogList").SetActive(false);
     }
     override
     protected void onAddListener() {
@@ -47,7 +48,7 @@ public class UIGame : ViewBase
     }
 
     private GameObject getScrollViewContent() {
-        GameObject scrollView = this.getChildByName("SVLogList");
+        GameObject scrollView = getChildByName("SVLogList");
         if (scrollView) {
             return scrollView.transform.Find("Viewport").Find("Content").gameObject;
         }

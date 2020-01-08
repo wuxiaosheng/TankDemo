@@ -80,6 +80,7 @@
      <Compile Include="Assets\Scripts\NetManager\NetManager.cs" />
      <Compile Include="Assets\Scripts\NetManager\NetRecv.cs" />
      <Compile Include="Assets\Scripts\NetManager\NetSend.cs" />
+     <Compile Include="Assets\Scripts\NetManager\NetSocket.cs" />
      <Compile Include="Assets\Scripts\ObjectManager\BulletObject.cs" />
      <Compile Include="Assets\Scripts\ObjectManager\MapObject.cs" />
      <Compile Include="Assets\Scripts\ObjectManager\ObjectManager.cs" />
