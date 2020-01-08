@@ -109,8 +109,9 @@ public class TankInput {
     }
 
     public void update() {
-        _hVal = Input.GetAxis("Horizontal")*5;
-        _vVal = Input.GetAxis("Vertical")*5;
+        if (!_obj._isSelfTank) { return; }
+        _hVal = Input.GetAxis("Horizontal")*10;
+        _vVal = Input.GetAxis("Vertical")*10;
         _hVal *= Time.deltaTime;
         _vVal *= Time.deltaTime;
         bool isSpaceKeyDown = Input.GetKeyDown(KeyCode.Space);

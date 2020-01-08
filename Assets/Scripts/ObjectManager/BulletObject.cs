@@ -68,7 +68,7 @@ public class BulletObject : MonoBehaviour
             Rigidbody targetRigidbody = colliders[i].GetComponent<Rigidbody> ();
             if (colliders[i].gameObject.tag == "Bullet") { continue; }
             if (!targetRigidbody) { continue; }
-            targetRigidbody.AddExplosionForce (_explosionForce, transform.position, _explosionRadius);
+            targetRigidbody.AddExplosionForce (_explosionForce, transform.forward, _explosionRadius);
             Event evt = EventManager.getInstance().createEvent(EventType.EVT_ON_BULLET_COLLISION, "ColliObject", collision.gameObject);
             evt.addArg("bullet", transform.gameObject);
             EventManager.getInstance().broadcast(evt);
