@@ -40,10 +40,10 @@ public class NetManager : MgrBase
     }
 
     private void onAddListener() {
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_LOG_VIEW, onLogView);
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_DISCONNECTED, onDisconnected);
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_DISPATCH_MSG, onDispatchMsg);   
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_LOG_VIEW, onEvtLogView);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onEvtServerConnected);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_DISCONNECTED, onEvtDisconnected);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_DISPATCH_MSG, onEvtDispatchMsg);   
     }
     public void addRecvhandler(string key, recvHandler handler) {
         if (_handlers.ContainsKey(key)) {
@@ -73,23 +73,23 @@ public class NetManager : MgrBase
         _socket.send(msgType, msgVal);
     }
 
-    private void onDispatchMsg(IEvent evt) {
+    private void onEvtDispatchMsg(IEvent evt) {
         MsgPack pack = (MsgPack)evt.getArg("MsgPack");
         if (_handlers.ContainsKey(pack.msgType)) {
             _handlers[pack.msgType](pack.msgType, pack.msgVal);
         }
     }
 
-    private void onServerConnected(IEvent evt) {
+    private void onEvtServerConnected(IEvent evt) {
         _recv = new NetRecv();
         _send = new NetSend();
     }
 
-    private void onDisconnected(IEvent evt) {
+    private void onEvtDisconnected(IEvent evt) {
 
     }
 
-    private void onLogView(IEvent evt) {
+    private void onEvtLogView(IEvent evt) {
         //if (GUIManager.getInstance().getView("UIGame") == null) { return; }
         //((UIGame)GUIManager.getInstance().getView("UIGame")).createLog((string)evt.getArg("str"));
     }

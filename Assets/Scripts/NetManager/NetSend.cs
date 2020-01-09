@@ -32,4 +32,19 @@ public class NetSend
         NetManager.getInstance().send("CSMsgNetFrame", val);
         return cmd;
     }
+
+    public void sendGameOver(int playerId) {
+        CSMsgGameOver gameover = new CSMsgGameOver();
+        gameover.playerId = playerId;
+        string val = JsonUtility.ToJson(gameover);
+        NetManager.getInstance().send("CSMsgGameOver", val);
+    }
+
+    public void sendTankDemage(int playerId, float demage) {
+        CSMsgTankDemage health = new CSMsgTankDemage();
+        health.playerId = playerId;
+        health.demage = demage;
+        string val = JsonUtility.ToJson(health);
+        NetManager.getInstance().send("CSMsgTankDemage", val);
+    }
 }

@@ -61,9 +61,28 @@ public class SCMsgNetFrame {
     public int frame;
     public PlayerCmd[] cmd;
 }
+[System.Serializable]
 public class CSMsgNetFrame {
     public int frame;
     public PlayerCmd cmd;
+}
+[System.Serializable]
+public class CSMsgGameOver {
+    public int playerId;
+}
+[System.Serializable]
+public class SCMsgGameOver {
+    public int playerId;
+}
+[System.Serializable]
+public class CSMsgTankDemage {
+    public int playerId;
+    public float demage;
+}
+[System.Serializable]
+public class SCMsgTankDemage {
+    public int playerId;
+    public float demage;
 }
 [System.Serializable]
 public class TankMoveCmd {

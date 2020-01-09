@@ -13,6 +13,7 @@ public class GameCtrl : MonoBehaviour
 {
     
     // Start is called before the first frame update
+    public bool _isOver = false;
     public GameCtrl() {
         GUIManager.getInstance();
         NetManager.getInstance();
@@ -37,30 +38,37 @@ public class GameCtrl : MonoBehaviour
     }
 
     void onAddListener() {
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onGameStart);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onEvtServerConnected);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onEvtGameStart);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_OVER, onEvtGameOver);
     }
 
     void onRemoveListener() {
-        EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
-        EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onGameStart);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onEvtServerConnected);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onEvtGameStart);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_OVER, onEvtGameOver);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
         EventManager.getInstance().update();
         GUIManager.getInstance().update();
         ObjectManager.getInstance().update();
     }
 
-    private void onServerConnected(IEvent evt) {
+    private void onEvtServerConnected(IEvent evt) {
         //发送开始消息
         NetManager.getInstance().getNetSend().sendReady();
     }
 
-    private void onGameStart(IEvent evt) {
+    private void onEvtGameStart(IEvent evt) {
+        DataManager.getInstance().getWirteOnly().setStart(true);
+    }
+
+    private void onEvtGameOver(IEvent evt) {
+        DataManager.getInstance().getWirteOnly().setStart(false);
+        int playerId = (int)evt.getArg("PlayerId");
 
     }
 

@@ -39,4 +39,14 @@ public class ReadOnlyData
         if (data == null) { return 0; }
         return ((GameData)data).getOwnerId();
     }
+
+    public bool isRoomOwner() {
+        return (getRoomOwnerId() == getSelfId());
+    }
+
+    public bool isStart() {
+        DataBase data = _delegate("GameData");
+        if (data == null) { return false; }
+        return ((GameData)data).isStart();
+    }
 }

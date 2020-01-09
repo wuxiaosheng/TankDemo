@@ -49,6 +49,12 @@ public class TankUpload {
         string str = JsonUtility.ToJson(cmd);
         return NetManager.getInstance().getNetSend().uploadNet(2, str);
     }
+
+    public void onCollisionEnter(Collision other) {
+        //TankLogicSync logic = FrameSyncManager.getInstance().getTankLogic(_obj._playerId);
+        //Vector3 pos = _obj.transform.position-logic.getTankTarPos();
+        //uploadMove(pos);
+    }
 }
 
 public class TankSyncExpre {
@@ -62,6 +68,7 @@ public class TankSyncExpre {
         TankLogicSync logic = FrameSyncManager.getInstance().getTankLogic(_obj._playerId);
         if (logic != null) {
             Vector3 pos = logic.getTankTarPos();
+            pos.y = _obj.transform.position.y;
             _obj.transform.position = Vector3.Lerp(_obj.transform.position, pos, 6*Time.deltaTime);
 
             Vector3 ro = logic.getTankChangeRo();
@@ -98,8 +105,8 @@ public class TankInput {
     private bool _isStoringForce;
     public float _fireForce;
     private bool _isFire;
-    private float _maxFireForce = 30.0f;
-    private float _minFireForce = 15.0f;
+    public float _maxFireForce = 30.0f;
+    public float _minFireForce = 5.0f;
     private float _maxChargeTime = 0.75f;
     private float _chargeSpeed;
 
@@ -110,7 +117,7 @@ public class TankInput {
 
     public void update() {
         if (!_obj._isSelfTank) { return; }
-        _hVal = Input.GetAxis("Horizontal")*10;
+        _hVal = Input.GetAxis("Horizontal")*6;
         _vVal = Input.GetAxis("Vertical")*10;
         _hVal *= Time.deltaTime;
         _vVal *= Time.deltaTime;
@@ -164,6 +171,7 @@ public class TankObject : MonoBehaviour
     private GameObject _explosionParticles;
     private GameObject _healthSlider;
     public GameObject _pointSlider;
+    public GameObject _turret;
     // Start is called before the first frame update
     public void start() {
         _isNeedRemove = false;
@@ -176,6 +184,9 @@ public class TankObject : MonoBehaviour
         _healthSlider = transform.Find("Canvas").Find("HealthSlider").gameObject;
         _pointSlider = transform.Find("Canvas").Find("PointSlider").gameObject;
         _pointSlider.SetActive(false);
+        _turret = transform.Find("TankRenderers").Find("TankTurret").gameObject;
+        _turret.GetComponent<MeshRenderer>().material = Resources.Load<Material>("Materials/"+(_playerId%10000));
+        //gameObject.GetComponent<MeshRenderer>().materials[0].CopyPropertiesFromMaterial(material);
     }
     public TankInfo getCurTankInfo() {
         TankInfo info = new TankInfo();
@@ -197,7 +208,18 @@ public class TankObject : MonoBehaviour
         return _isNeedRemove;
     }
 
+    public int getPlayerId() {
+        return _playerId;
+    }
+
+    public void setDemage(float demage) {
+        _model._hp -= demage;
+    }
+
     public void onRemove() {
+        if (_isSelfTank) {
+            EventManager.getInstance().broadcast(EventType.EVT_ON_SELF_DEAD);
+        }
         _explosionParticles.transform.parent = null;
         _explosionParticles.GetComponent<ParticleSystem>().Play();
         ParticleSystem.MainModule mainModule = _explosionParticles.GetComponent<ParticleSystem>().main;
@@ -211,7 +233,14 @@ public class TankObject : MonoBehaviour
         float radius = bullet.getExplosionRadius();
         float demage = bullet.calculateDamage(transform.position);
         _rigidbody.AddExplosionForce(force, transform.position, radius);
-        _model._hp -= demage;
-        Debug.Log("demage:"+demage);
+        if (bullet._playerId != DataManager.getInstance().getReadOnly().getSelfId()) { return; }
+        NetManager.getInstance().getNetSend().sendTankDemage(_playerId, demage);
+        
+        //_model._hp -= demage;
+        //Debug.Log("demage:"+demage);
+    }
+
+    private void OnCollisionEnter(Collision other) {
+        _upload.onCollisionEnter(other);
     }
 }

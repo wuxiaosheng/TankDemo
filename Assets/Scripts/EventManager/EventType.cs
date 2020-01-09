@@ -10,4 +10,7 @@ public enum EventType {
     EVT_ON_FIRE,
     EVT_ON_LOG_VIEW,
     EVT_ON_BULLET_COLLISION,
+    EVT_ON_SELF_DEAD,
+    EVT_ON_GAME_OVER,
+    EVT_ON_TANK_DEMAGE,
 }

@@ -19,13 +19,13 @@ public class FrameSyncManager : MgrBase
     }
 
     public void onAddListener() {
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_NET_UPDATE, onNetUpdate);
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onGameStart);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_NET_UPDATE, onEvtNetUpdate);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onEvtGameStart);
     }
 
     public void onRemoveListener() {
-        EventManager.getInstance().removeEventListener(EventType.EVT_ON_NET_UPDATE, onNetUpdate);
-        EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onGameStart);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_NET_UPDATE, onEvtNetUpdate);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onEvtGameStart);
     }
     public TankLogicSync getTankLogic(int playerId) {
         if (_tanks.ContainsKey(playerId)) {
@@ -52,7 +52,7 @@ public class FrameSyncManager : MgrBase
         return vec3;
     }*/
 
-    private void onNetUpdate(IEvent evt) {
+    private void onEvtNetUpdate(IEvent evt) {
         SCMsgNetFrame data = (SCMsgNetFrame)evt.getArg("NetFrameData");
         foreach (PlayerCmd cmd in data.cmd) {
             if (cmd.type == 0) {
@@ -65,7 +65,7 @@ public class FrameSyncManager : MgrBase
         }
     }
 
-    private void onGameStart(IEvent evt) {
+    private void onEvtGameStart(IEvent evt) {
         List<PlayerInfo> list = DataManager.getInstance().getReadOnly().getAllPlayer();
         foreach (PlayerInfo info in list) {
             _tanks[info.playerId] = new TankLogicSync();

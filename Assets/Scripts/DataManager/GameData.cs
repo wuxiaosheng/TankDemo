@@ -6,6 +6,7 @@ public class GameData : DataBase
 {
     private int _frame;
     private int _ownerId;
+    private bool _isStart;
     public int getFrame() {
         return _frame;
     }
@@ -19,5 +20,12 @@ public class GameData : DataBase
 
     public void setOwnerId(int ownerId) {
         _ownerId = ownerId;
+    }
+
+    public void setStart(bool isStart) {
+        _isStart = isStart;
+    }
+    public bool isStart() {
+        return _isStart;
     }
 }

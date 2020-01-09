@@ -18,15 +18,18 @@ public class UIGame : ViewBase
         _cellDemo = getChildByName("TextDemo");
         _cellDemo.SetActive(false);
         getChildByName("SVLogList").SetActive(false);
+        getChildByName("DeadPanel").SetActive(false);
     }
     override
     protected void onAddListener() {
-
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_SELF_DEAD, onEvtSelfDead);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_OVER, onEvtGameOver);
     }
 
     override
     protected void onRemoveListener() {
-
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_SELF_DEAD, onEvtSelfDead);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_OVER, onEvtGameOver);
     }
 
     override
@@ -53,5 +56,17 @@ public class UIGame : ViewBase
             return scrollView.transform.Find("Viewport").Find("Content").gameObject;
         }
         return null;
+    }
+
+    private void onEvtSelfDead(IEvent evt) {
+        getChildByName("DeadPanel").SetActive(true);
+    }
+
+    private void onEvtGameOver(IEvent evt) {
+        int playerId = (int)evt.getArg("PlayerId");
+        PlayerInfo info = DataManager.getInstance().getReadOnly().getPlayer(playerId);
+        if (info == null) { return; }
+        getChildByName("DeadPanel").SetActive(true);
+        getChildByName("DeadPanel").transform.Find("Text").GetComponent<Text>().text = "Winner:"+info.name;
     }
 }

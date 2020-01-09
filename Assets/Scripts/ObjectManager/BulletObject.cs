@@ -5,6 +5,7 @@ using UnityEngine;
 public class BulletObject : MonoBehaviour
 {
     // Start is called before the first frame update
+    public int _playerId;
     private float _destroyTime = 3.0f;
     private bool _isNeedRemove = false;
     private float _explosionRadius = 5.0f;
@@ -63,11 +64,10 @@ public class BulletObject : MonoBehaviour
         _explosionParticles.GetComponent<ParticleSystem>().Play();
         ParticleSystem.MainModule mainModule = _explosionParticles.GetComponent<ParticleSystem>().main;
         Destroy (_explosionParticles.gameObject, mainModule.duration);
-        Collider[] colliders = Physics.OverlapSphere(transform.position, _explosionRadius, LayerMask.NameToLayer("Players"));
+        Collider[] colliders = Physics.OverlapSphere(transform.position, _explosionRadius);
         for (int i = 0; i < colliders.Length; i++) {
             Rigidbody targetRigidbody = colliders[i].GetComponent<Rigidbody> ();
-            if (colliders[i].gameObject.tag == "Bullet") { continue; }
-            if (!targetRigidbody) { continue; }
+            if (colliders[i].gameObject.tag != "Tank") { continue; }
             targetRigidbody.AddExplosionForce (_explosionForce, transform.forward, _explosionRadius);
             Event evt = EventManager.getInstance().createEvent(EventType.EVT_ON_BULLET_COLLISION, "ColliObject", collision.gameObject);
             evt.addArg("bullet", transform.gameObject);

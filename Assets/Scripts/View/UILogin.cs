@@ -15,11 +15,11 @@ public class UILogin : ViewBase
     }
     override
     protected void onAddListener() {
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_CONNECTED, onEvtServerConnected);
     }
     override
     protected void onRemoveListener() {
-        //EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onServerConnected);
+        //EventManager.getInstance().removeEventListener(EventType.EVT_ON_CONNECTED, onEvtServerConnected);
     }
     override
     public void update() {
@@ -31,7 +31,7 @@ public class UILogin : ViewBase
         }
         _text.GetComponent<Text>().text = _content;
     }
-    private void onServerConnected(IEvent evt) {
+    private void onEvtServerConnected(IEvent evt) {
         GUIManager.getInstance().showView(ViewType.WAIT_JOIN);
     }
 }

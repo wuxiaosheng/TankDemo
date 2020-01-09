@@ -10,6 +10,8 @@ public class NetRecv
         NetManager.getInstance().addRecvhandler("SCMsgExitRoom", SCMsgExitRoom);
         NetManager.getInstance().addRecvhandler("SCMsgGameStart", SCMsgGameStart);
         NetManager.getInstance().addRecvhandler("SCMsgNetFrame", SCMsgNetFrame);
+        NetManager.getInstance().addRecvhandler("SCMsgGameOver", SCMsgGameOver);
+        NetManager.getInstance().addRecvhandler("SCMsgTankDemage", SCMsgTankDemage);
     }
     private void SCMsgReady(string msgType, string val) {
         Debug.Log("SCMsgReady");
@@ -45,5 +47,15 @@ public class NetRecv
         EventManager.getInstance().broadcast(EventType.EVT_ON_NET_UPDATE, "NetFrameData", res);
         //SCMsgNetFrame res = JsonUtility.FromJson<SCMsgNetFrame>(msgVal);
         //DataManager.getInstance().getWirteOnly().setFrame(res.frame);
+    }
+
+    private void SCMsgGameOver(string msgType, string msgVal) {
+        SCMsgGameOver res = JsonUtility.FromJson<SCMsgGameOver>(msgVal);
+        EventManager.getInstance().broadcast(EventType.EVT_ON_GAME_OVER, "PlayerId", res.playerId);
+    }
+
+    private void SCMsgTankDemage(string msgType, string msgVal) {
+        SCMsgTankDemage res = JsonUtility.FromJson<SCMsgTankDemage>(msgVal);
+        EventManager.getInstance().broadcast(EventType.EVT_ON_TANK_DEMAGE, "DemageInfo", res);
     }
 }

@@ -28,15 +28,19 @@ public class ObjectManager : MgrBase
         onAddListener();
     }
     protected void onAddListener() {
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onGameStart);
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_FIRE, onFire);
-        EventManager.getInstance().addEventListener(EventType.EVT_ON_BULLET_COLLISION, onBulletCollision);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_GAME_START, onEvtGameStart);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_FIRE, onEvtFire);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_BULLET_COLLISION, onEvtBulletCollision);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_SELF_DEAD, onEvtSelfDead);
+        EventManager.getInstance().addEventListener(EventType.EVT_ON_TANK_DEMAGE, onEvtTankDemage);
     }
 
     protected void onRemoveListener() {
-        EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onGameStart);
-        EventManager.getInstance().removeEventListener(EventType.EVT_ON_FIRE, onFire);
-        EventManager.getInstance().removeEventListener(EventType.EVT_ON_BULLET_COLLISION, onBulletCollision);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_GAME_START, onEvtGameStart);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_FIRE, onEvtFire);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_BULLET_COLLISION, onEvtBulletCollision);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_SELF_DEAD, onEvtSelfDead);
+        EventManager.getInstance().removeEventListener(EventType.EVT_ON_TANK_DEMAGE, onEvtTankDemage);
     }
 
     public GameObject createTank(int playerId, Vector3 pos) {
@@ -47,7 +51,6 @@ public class ObjectManager : MgrBase
         obj.GetComponent<TankObject>()._isSelfTank = (playerId == selfId);
         obj.GetComponent<TankObject>()._playerId = playerId;
         obj.GetComponent<TankObject>().start();
-        obj.layer = LayerMask.NameToLayer("Players");
         _tanks.Add(playerId, obj);
         return obj;
     }
@@ -70,7 +73,8 @@ public class ObjectManager : MgrBase
         bullet.transform.position = pos;
         bullet.transform.rotation = ro;
         bullet.AddComponent<BulletObject>();
-        bullet.AddComponent<BulletObject>().addForce(force, forward);
+        bullet.GetComponent<BulletObject>()._playerId = playerId;
+        bullet.GetComponent<BulletObject>().addForce(force, forward);
         if (!_bullets.ContainsKey(playerId)) {
             _bullets.Add(playerId, new List<GameObject>());
         }
@@ -102,17 +106,30 @@ public class ObjectManager : MgrBase
                 }
             }
         }
+
+        //
+        if (DataManager.getInstance().getReadOnly().isRoomOwner() && DataManager.getInstance().getReadOnly().isStart()) {
+            Debug.Log("tank count:"+_tanks.Count);
+            if (_tanks.Count <= 1) {
+                Debug.Log("tank count:"+_tanks.Count);
+                int playerId = 0;
+                foreach (KeyValuePair<int, GameObject> pair in _tanks) {
+                    playerId = pair.Key;
+                }
+                NetManager.getInstance().getNetSend().sendGameOver(playerId);
+            }
+        }
     }
 
-    private void attachCamera(GameObject obj) {
+    public void attachCamera(GameObject obj, Vector3 pos, Vector3 ro) {
         if (!obj) { return; }
         _camera = GameObject.Find("Main Camera");
         _camera.transform.SetParent(obj.transform);
-        _camera.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y+20, obj.transform.position.z-10);
-        _camera.transform.Rotate(45.0f, 0.0f, 0.0f);
+        _camera.transform.position = pos;
+        _camera.transform.Rotate(ro);
     }
 
-    private void onGameStart(IEvent evt) {
+    private void onEvtGameStart(IEvent evt) {
         createMap();
         List<PlayerInfo> list = DataManager.getInstance().getReadOnly().getAllPlayer();
         foreach (PlayerInfo info in list) {
@@ -120,12 +137,14 @@ public class ObjectManager : MgrBase
             Vector3 pos = _map.GetComponent<MapObject>().getBornPos(info.playerId%10000);
             GameObject tank = createTank(info.playerId, pos);
             if (isSelf) {
-                attachCamera(tank);
+                Vector3 initPos = new Vector3(tank.transform.position.x, tank.transform.position.y+15, tank.transform.position.z-6.5f);
+                Vector3 initRo = new Vector3(45.0f, 0.0f, 0.0f);
+                attachCamera(tank, initPos, initRo);
             }
         }
     }
 
-    private void onFire(IEvent evt) {
+    private void onEvtFire(IEvent evt) {
         float force = (float)evt.getArg("force");
         Vector3 pos = (Vector3)evt.getArg("pos");
         Quaternion ro = (Quaternion)evt.getArg("ro");
@@ -134,11 +153,25 @@ public class ObjectManager : MgrBase
         createBullet(playerId, force, pos, ro, forward);
     }
 
-    private void onBulletCollision(IEvent evt) {
+    private void onEvtBulletCollision(IEvent evt) {
         GameObject obj = (GameObject)evt.getArg("ColliObject");
         TankObject tank = obj.GetComponent<TankObject>();
         BulletObject bullet = ((GameObject)evt.getArg("bullet")).GetComponent<BulletObject>();
         if (tank == null) { return; }
         tank.onBulletHit(bullet);
+    }
+
+    private void onEvtSelfDead(IEvent evt) {
+        Vector3 initPos = new Vector3(0, _map.transform.position.y+40, -60);
+        Vector3 initRo = new Vector3(0.0f, 0.0f, 0.0f);
+        attachCamera(_map, initPos, initRo);
+        _camera.transform.eulerAngles = new Vector3(45.0f, 0.0f, 0.0f);
+    }
+
+    private void onEvtTankDemage(IEvent evt) {
+        SCMsgTankDemage info = (SCMsgTankDemage)evt.getArg("DemageInfo");
+        GameObject tank = _tanks[info.playerId];
+        if (tank == null) { return; }
+        tank.GetComponent<TankObject>().setDemage(info.demage);
     }
 }

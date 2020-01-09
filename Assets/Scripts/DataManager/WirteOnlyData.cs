@@ -45,4 +45,10 @@ public class WirteOnlyData
         if (data == null) { return; }
         ((GameData)data).setOwnerId(playerId);
     }
+
+    public void setStart(bool isStart) {
+        DataBase data = _delegate("GameData");
+        if (data == null) { return; }
+        ((GameData)data).setStart(isStart);
+    }
 }
