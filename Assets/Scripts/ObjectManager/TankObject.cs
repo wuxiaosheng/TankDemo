@@ -143,6 +143,89 @@ public class TankInput {
             _obj._pointSlider.GetComponent<Slider>().value = _fireForce;
         }
 
+        Debug.Log("mouse y"+Input.GetAxis("Mouse X"));
+
+
+    }
+
+    public bool isMove() {
+        return (_vVal != 0.0f);
+    }
+
+    public bool isRotate() {
+        return (_hVal != 0.0f);
+    }
+
+    public bool isFire() {
+        return _isFire;
+    }
+}
+
+public class TankKeyboard {
+    private TankObject _obj;
+    public float _hVal;
+    public float _vVal;
+    private float _mouseX;
+    private bool _isStoringForce;
+    public float _fireForce;
+    private bool _isFire;
+    public float _maxFireForce = 30.0f;
+    public float _minFireForce = 5.0f;
+    private float _maxChargeTime = 0.75f;
+    private float _chargeSpeed;
+    public TankKeyboard(TankObject obj) {
+        _obj = obj;
+        _mouseX = Input.GetAxis("Mouse X");
+        Cursor.visible = false;
+    }
+
+    public void update() {
+        _hVal = getHorizontalVal();
+        Debug.Log("Horizontal val:"+_hVal);
+        _vVal = Input.GetAxis("Vertical")*10;
+        _hVal *= Time.deltaTime;
+        _vVal *= Time.deltaTime;
+        bool isSpaceKeyDown = Input.GetKeyDown(KeyCode.Space);
+        bool isSpaceKeyUp = Input.GetKeyUp(KeyCode.Space);
+        _isFire = false;
+        if (isSpaceKeyDown) {
+            _isStoringForce = true;
+            _fireForce = _minFireForce;
+            _obj._pointSlider.SetActive(true);
+        }
+
+        if (isSpaceKeyUp) {
+            _isStoringForce = false;
+            _isFire = true;
+            _obj._pointSlider.SetActive(false);
+        }
+
+        if (_isStoringForce) {
+            //正在蓄力
+            _fireForce += (_chargeSpeed*Time.deltaTime);
+            _fireForce = (_fireForce > _maxFireForce ? _maxFireForce : _fireForce);
+            _obj._pointSlider.GetComponent<Slider>().value = _fireForce;
+        }
+
+    }
+    private float getHorizontalVal() {
+        if(true || Input.GetMouseButtonDown(1)) {
+            Debug.Log("GetMouseButtonDown");
+            
+        }
+
+        if (true || Input.GetMouseButtonUp(1)) {
+            Debug.Log("GetMouseButtonUp");
+            _mouseX = Input.GetAxis("Mouse X");
+            //Cursor.visible = true;
+        }
+
+        if (Cursor.visible == false) {
+            float h = Input.GetAxis("Mouse X")-_mouseX;
+            //_mouseX = Input.GetAxis("Mouse X");
+            return h*10;
+        }
+        return 0;
     }
 
     public bool isMove() {
@@ -166,7 +249,7 @@ public class TankObject : MonoBehaviour
     private Rigidbody _rigidbody;
     public TankUpload _upload;
     public TankSyncExpre _expre;
-    public TankInput _input;
+    public TankKeyboard _input;
     public TankModel _model;
     private GameObject _explosionParticles;
     private GameObject _healthSlider;
@@ -177,7 +260,7 @@ public class TankObject : MonoBehaviour
         _isNeedRemove = false;
         _rigidbody = transform.GetComponent<Rigidbody>();
         _model = new TankModel(this);
-        _input = new TankInput(this);
+        _input = new TankKeyboard(this);
         _upload = new TankUpload(this);
         _expre = new TankSyncExpre(this);
         _explosionParticles = GameObject.Instantiate(Resources.Load("Prefabs/TankExplosion"), transform) as GameObject;

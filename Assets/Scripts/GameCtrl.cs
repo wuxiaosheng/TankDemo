@@ -13,7 +13,7 @@ public class GameCtrl : MonoBehaviour
 {
     
     // Start is called before the first frame update
-    public bool _isOver = false;
+    private GameObject _camera;
     public GameCtrl() {
         GUIManager.getInstance();
         NetManager.getInstance();
@@ -35,6 +35,8 @@ public class GameCtrl : MonoBehaviour
         GUIManager.getInstance().showView(ViewType.LOGIN);
         NetManager.getInstance().startConnect("192.168.1.10", 19904);
         onAddListener();
+
+        
     }
 
     void onAddListener() {
