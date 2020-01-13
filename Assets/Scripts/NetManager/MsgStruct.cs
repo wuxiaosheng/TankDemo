@@ -29,6 +29,7 @@ public class PlayerInfo {
 public class TankInfo {
     public Vector3 pos;
     public Vector3 ro;
+    public Vector3 batteryRo;
 }
 
 [System.Serializable]
@@ -95,4 +96,8 @@ public class TankRotateCmd {
 [System.Serializable]
 public class TankFireCmd {
     public float force;
+}
+[System.Serializable]
+public class TankBatteryRotateCmd {
+    public Vector3 rotate;
 }

@@ -57,10 +57,12 @@ public class FrameSyncManager : MgrBase
         foreach (PlayerCmd cmd in data.cmd) {
             if (cmd.type == 0) {
                 onDealMove(cmd.playerId, cmd.cmd);
-            } else if (cmd.type == 1) {
-                onDealRotate(cmd.playerId, cmd.cmd);
+            } else if (cmd.type == 3) {
+                onDealBatteryRo(cmd.playerId, cmd.cmd);
             } else if (cmd.type == 2) {
                 onDealFire(cmd.playerId, cmd.cmd);
+            } else if (cmd.type == 1) {
+                onDealRotate(cmd.playerId, cmd.cmd);
             }
         }
     }
@@ -90,6 +92,12 @@ public class FrameSyncManager : MgrBase
         TankFireCmd cmd = JsonUtility.FromJson<TankFireCmd>(content);
         if (_tanks.ContainsKey(playerId)) {
             _tanks[playerId].onFire(cmd.force);
+        }
+    }
+    private void onDealBatteryRo(int playerId, string content) {
+        TankBatteryRotateCmd cmd = JsonUtility.FromJson<TankBatteryRotateCmd>(content);
+        if (_tanks.ContainsKey(playerId)) {
+            _tanks[playerId].onChangeBatteryRo(cmd.rotate);
         }
     }
 }

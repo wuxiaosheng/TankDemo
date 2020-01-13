@@ -136,10 +136,11 @@ public class ObjectManager : MgrBase
             bool isSelf = DataManager.getInstance().getReadOnly().getSelfId() == info.playerId;
             Vector3 pos = _map.GetComponent<MapObject>().getBornPos(info.playerId%10000);
             GameObject tank = createTank(info.playerId, pos);
+            GameObject parent = tank.GetComponent<TankObject>().getCameraParent();
             if (isSelf) {
                 Vector3 initPos = new Vector3(tank.transform.position.x, tank.transform.position.y+15, tank.transform.position.z-6.5f);
                 Vector3 initRo = new Vector3(45.0f, 0.0f, 0.0f);
-                attachCamera(tank, initPos, initRo);
+                attachCamera(parent, initPos, initRo);
             }
         }
     }
