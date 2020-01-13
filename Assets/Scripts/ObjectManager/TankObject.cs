@@ -13,13 +13,15 @@ public class TankModel {
 
 public class TankUpload {
     private TankObject _obj;
+    private GameObject _base;
     public TankUpload(TankObject obj) {
         _obj = obj;
+        _base = _obj.transform.Find("TankRenderers").gameObject;
     }
     public void update() {
         if (!_obj._isSelfTank) { return; }
         if (_obj._input.isMove()) {
-            PlayerCmd cmd = uploadMove(_obj.transform.forward*_obj._input._vVal);
+            PlayerCmd cmd = uploadMove(_base.transform.forward*_obj._input._vVal);
         }
         if (_obj._input.isRotate()) {
             PlayerCmd cmd = uploadRotate(new Vector3(0.0f, _obj._input._hVal*6.0f, 0.0f));
@@ -71,12 +73,19 @@ public class TankSyncExpre {
     private TankObject _obj;
     private GameObject _firePoint;
     private GameObject _battery;
+    private GameObject _batteryCopy;
     private GameObject _pointer;
+    private GameObject _base;
+    private GameObject _hpCanvas;
     public TankSyncExpre(TankObject obj) {
         _obj = obj;
-        _firePoint = _obj.transform.Find("TankRenderers").Find("TankTurret").Find("FirePoint").gameObject;
+        _firePoint = _obj.transform.Find("TankTurret").Find("FirePoint").gameObject;
         _battery = _obj.transform.Find("TankRenderers").Find("TankTurret").gameObject;
-        _pointer = _obj.transform.Find("Canvas").Find("PointSlider").gameObject;
+        _pointer = _obj.transform.Find("TankTurret").Find("Canvas").Find("PointSlider").gameObject;
+        _base = _obj.transform.Find("TankRenderers").gameObject;
+        _batteryCopy = _obj.transform.Find("TankTurret").gameObject;
+        _hpCanvas = _obj.transform.Find("Canvas").gameObject;
+
     }
     public void update() {
         TankLogicSync logic = FrameSyncManager.getInstance().getTankLogic(_obj._playerId);
@@ -84,34 +93,34 @@ public class TankSyncExpre {
             Vector3 pos = logic.getTankTarPos();
             pos.y = _obj.transform.position.y;
             _obj.transform.position = Vector3.Lerp(_obj.transform.position, pos, 6*Time.deltaTime);
-
+            _hpCanvas.transform.position = new Vector3(_obj.transform.position.x, _obj.transform.position.y+0.2f, _obj.transform.position.z);
+            _hpCanvas.transform.eulerAngles = new Vector3(90.0f, _obj.transform.eulerAngles.y, _obj.transform.eulerAngles.z);
             //旋转炮台
             Vector3 ro = logic.getTankChangeBatteryRo();
             if (ro.y != 0) {
-                _battery.transform.Rotate(ro);
-                _pointer.transform.Rotate(new Vector3(0.0f, 0.0f, -ro.y));
+                _batteryCopy.transform.Rotate(ro);
             } else {
                 Vector3 tarRo = logic.getTankTarBatteryRo();
-                _battery.transform.eulerAngles = tarRo;
+                _batteryCopy.transform.eulerAngles = tarRo;
                 //_pointer.transform.eulerAngles = new Vector3(0.0f, tarRo.y, 0.0f);
             }
-
+            
             //坦克旋转
             ro = logic.getTankChangeRo();
             Debug.Log(ro);
             if (ro.y != 0) {
-                _obj.transform.Rotate(ro);
+                _base.transform.Rotate(ro);
             } else {
                 Vector3 tarRo = logic.getTankTarRo();
-                _obj.transform.eulerAngles = tarRo;
+                _base.transform.eulerAngles = tarRo;
             }
-            
+            _batteryCopy.transform.position = _battery.transform.position;
 
             float force = logic.getTankFireForce();
             if (force != 0) {
                 fire(force);
             } 
-
+            
         }
     }
 
@@ -203,7 +212,6 @@ public class TankKeyboard {
     public TankKeyboard(TankObject obj) {
         _obj = obj;
         _mouseX = Input.GetAxis("Mouse X");
-        Cursor.visible = false;
         _chargeSpeed = (_maxFireForce-_minFireForce)/_maxChargeTime;
     }
 
@@ -212,12 +220,12 @@ public class TankKeyboard {
         _batteryHVal = getHorizontalVal();
         _hVal = Input.GetAxis("Horizontal")*6;
         //Debug.Log("Horizontal val:"+_hVal);
-        _vVal = Input.GetAxis("Vertical")*10;
+        _vVal = Input.GetAxis("Vertical")*2;
         _batteryHVal *= Time.deltaTime;
         _hVal *= Time.deltaTime;
         _vVal *= Time.deltaTime;
-        bool isSpaceKeyDown = Input.GetKeyDown(KeyCode.Space);
-        bool isSpaceKeyUp = Input.GetKeyUp(KeyCode.Space);
+        bool isSpaceKeyDown = Input.GetMouseButtonDown(0);//Input.GetKeyDown(KeyCode.Space);
+        bool isSpaceKeyUp = Input.GetMouseButtonUp(0);//Input.GetKeyUp(KeyCode.Space);
         _isFire = false;
         if (isSpaceKeyDown) {
             _isStoringForce = true;
@@ -240,27 +248,28 @@ public class TankKeyboard {
 
     }
     private float getHorizontalVal() {
-        float h = Input.GetAxis("Mouse X")-_mouseX;
+        /*float h = Input.GetAxis("Mouse X")-_mouseX;
         if (h != 0) {
             //_mouseX = Input.GetAxis("Mouse X");
             return h*10;
-        }
-        /*if(true || Input.GetMouseButtonDown(1)) {
+        }*/
+        if(Input.GetMouseButtonDown(1)) {
             Debug.Log("GetMouseButtonDown");
-            
+            Cursor.visible = false;
+
         }
 
-        if (true || Input.GetMouseButtonUp(1)) {
+        if (Input.GetMouseButtonUp(1)) {
             Debug.Log("GetMouseButtonUp");
             _mouseX = Input.GetAxis("Mouse X");
-            //Cursor.visible = true;
+            Cursor.visible = true;
         }
 
         if (Cursor.visible == false) {
             float h = Input.GetAxis("Mouse X")-_mouseX;
             //_mouseX = Input.GetAxis("Mouse X");
             return h*10;
-        }*/
+        }
         return 0;
     }
 
@@ -305,9 +314,9 @@ public class TankObject : MonoBehaviour
         _expre = new TankSyncExpre(this);
         _explosionParticles = GameObject.Instantiate(Resources.Load("Prefabs/TankExplosion"), transform) as GameObject;
         _healthSlider = transform.Find("Canvas").Find("HealthSlider").gameObject;
-        _pointSlider = transform.Find("Canvas").Find("PointSlider").gameObject;
+        _pointSlider = transform.Find("TankTurret").Find("Canvas").Find("PointSlider").gameObject;
         _pointSlider.SetActive(false);
-        _turret = transform.Find("TankRenderers").Find("TankTurret").gameObject;
+        _turret = transform.Find("TankTurret").gameObject;
         _turret.GetComponent<MeshRenderer>().material = Resources.Load<Material>("Materials/"+(_playerId%10000));
         //gameObject.GetComponent<MeshRenderer>().materials[0].CopyPropertiesFromMaterial(material);
     }
@@ -336,7 +345,7 @@ public class TankObject : MonoBehaviour
     }
 
     public GameObject getCameraParent() {
-        return transform.Find("TankRenderers").Find("TankTurret").gameObject;
+        return transform.Find("TankTurret").gameObject;
     }
 
     public void setDemage(float demage) {

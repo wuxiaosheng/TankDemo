@@ -10,7 +10,7 @@ public class BulletObject : MonoBehaviour
     private bool _isNeedRemove = false;
     private float _explosionRadius = 5.0f;
     private float _explosionForce = 1000.0f;
-    private float _maxDemage = 10.0f;
+    private float _maxDemage = 30.0f;
     private GameObject _explosionParticles;
     void Start()
     {
